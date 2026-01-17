@@ -2,8 +2,8 @@
 #include <cstdlib>
 #include <ctime>
 
-#include "Game.h"
 #include "Constants.h"
+#include "Game.h"
 
 int main()
 {
@@ -16,52 +16,43 @@ int main()
     window.setFramerateLimit(60);
 
     ApplesGame::Game game;
-    if (!ApplesGame::InitGame(game))
+    if (!game.Init())
     {
         return 1;
     }
 
     sf::Clock clock;
-
     float previousTimeSeconds = clock.getElapsedTime().asSeconds();
 
     while (window.isOpen())
     {
-        const float currentTimeSeconds = clock.getElapsedTime().asSeconds();
-        float deltaTimeSeconds = currentTimeSeconds - previousTimeSeconds;
+        float currentTimeSeconds = clock.getElapsedTime().asSeconds();
+        float dt = currentTimeSeconds - previousTimeSeconds;
         previousTimeSeconds = currentTimeSeconds;
 
-        if (deltaTimeSeconds > ApplesGame::k_MaxDtSeconds)
+        if (dt > ApplesGame::k_MaxDtSeconds)
         {
-            deltaTimeSeconds = ApplesGame::k_MaxDtSeconds;
+            dt = ApplesGame::k_MaxDtSeconds;
         }
 
         sf::Event event{};
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed ||
-                (event.type == sf::Event::KeyPressed &&
-                    event.key.code == sf::Keyboard::Escape))
+                (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
             {
+                game.Shutdown();
                 window.close();
+                break;
             }
 
-            if (event.type == sf::Event::KeyPressed &&
-                event.key.code == sf::Keyboard::Space)
-            {
-                if (game.state.mode == ApplesGame::EGameMode::MainMenu ||
-                    game.state.mode == ApplesGame::EGameMode::GameOver)
-                {
-                    ApplesGame::ResetGameplay(game);
-                    game.state.mode = ApplesGame::EGameMode::Playing;
-                }
-            }
+            game.HandleEvent(event);
         }
 
-        ApplesGame::UpdateGame(game, deltaTimeSeconds);
+        game.Update(dt);
 
         window.clear();
-        ApplesGame::DrawGame(game, window);
+        game.Draw(window);
         window.display();
     }
 

@@ -162,6 +162,7 @@
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameMain.cpp" />
+    <ClCompile Include="Loggers.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderHelpers.cpp" />
@@ -173,12 +174,14 @@
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="GameState.h" />
+    <ClInclude Include="GameMode.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="RenderHelpers.h" />
     <ClInclude Include="Resources.h" />
     <ClInclude Include="UI.h" />
+    <ClInclude Include="UIModel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,15 +1,22 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+
+#include "Constants.h"
 #include "Math.h"
 
 namespace ApplesGame
 {
-    struct Apple
+    class Apple
     {
-        Position2D position;
-        sf::Sprite sprite;
-    };
+    public:
+        void Respawn(const sf::Texture& texture);
+        void Draw(sf::RenderWindow& window);
 
-    void InitApple(Apple& apple, const sf::Texture& texture);
-    void DrawApple(Apple& apple, sf::RenderWindow& window);
+        const Position2D& GetPosition() const { return m_position; }
+        float GetRadius() const { return k_AppleRadius; }
+
+    private:
+        Position2D m_position{};
+        sf::Sprite m_sprite;
+    };
 }

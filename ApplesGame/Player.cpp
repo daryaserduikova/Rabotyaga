@@ -1,52 +1,77 @@
 #include "Player.h"
-#include "Math.h"
 
 namespace ApplesGame
 {
-    void InitPlayer(Player& player, const sf::Texture& texture)
+    void Player::Reset(const sf::Texture& texture)
     {
-        player.position =
-        {
-            k_ScreenWidthF / 2.0F,
-            k_ScreenHeightF / 2.0F
-        };
+        m_position = { k_ScreenWidthF / 2.0F, k_ScreenHeightF / 2.0F };
+        m_speed = k_InitialSpeed;
+        m_direction = EPlayerDirection::Right;
 
-        player.speed = k_InitialSpeed;
-        player.direction = EPlayerDirection::Right;
-
-        player.sprite.setTexture(texture);
-        player.sprite.setOrigin(GetSpriteOrigin(player.sprite, { 0.5F, 0.5F }));
-        player.sprite.setScale(GetSpriteScale(player.sprite, { k_PlayerSize, k_PlayerSize }));
-        player.sprite.setRotation(0.0F);
+        m_sprite.setTexture(texture);
+        m_sprite.setOrigin(GetSpriteOrigin(m_sprite, { 0.5F, 0.5F }));
+        m_sprite.setScale(GetSpriteScale(m_sprite, { k_PlayerSize, k_PlayerSize }));
+        m_sprite.setRotation(0.0F);
     }
 
-    void UpdatePlayer(Player& player, float deltaTimeSeconds)
+    void Player::HandleInput()
     {
-        switch (player.direction)
+        const bool right = sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+        const bool up = sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+        const bool left = sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+        const bool down = sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+
+        if (right) m_direction = EPlayerDirection::Right;
+        else if (up) m_direction = EPlayerDirection::Up;
+        else if (left) m_direction = EPlayerDirection::Left;
+        else if (down) m_direction = EPlayerDirection::Down;
+    }
+
+    void Player::Update(float dt)
+    {
+        switch (m_direction)
         {
-        case EPlayerDirection::Up:
-            player.position.y -= player.speed * deltaTimeSeconds;
-            break;
-
-        case EPlayerDirection::Right:
-            player.position.x += player.speed * deltaTimeSeconds;
-            break;
-
-        case EPlayerDirection::Down:
-            player.position.y += player.speed * deltaTimeSeconds;
-            break;
-
-        case EPlayerDirection::Left:
-            player.position.x -= player.speed * deltaTimeSeconds;
-            break;
+        case EPlayerDirection::Up:    m_position.y -= m_speed * dt; break;
+        case EPlayerDirection::Right: m_position.x += m_speed * dt; break;
+        case EPlayerDirection::Down:  m_position.y += m_speed * dt; break;
+        case EPlayerDirection::Left:  m_position.x -= m_speed * dt; break;
         }
     }
 
-    bool HasPlayerCollisionWithScreenBorder(const Player& player)
+    void Player::ApplySpriteTransform()
     {
-        return (player.position.x - k_PlayerRadius < 0.0F) ||
-            (player.position.x + k_PlayerRadius > k_ScreenWidthF) ||
-            (player.position.y - k_PlayerRadius < 0.0F) ||
-            (player.position.y + k_PlayerRadius > k_ScreenHeightF);
+        const sf::Vector2f scale = GetSpriteScale(m_sprite, { k_PlayerSize, k_PlayerSize });
+
+        switch (m_direction)
+        {
+        case EPlayerDirection::Up:    m_sprite.setScale(scale.x, scale.y); m_sprite.setRotation(-90.0F); break;
+        case EPlayerDirection::Right: m_sprite.setScale(scale.x, scale.y); m_sprite.setRotation(0.0F); break;
+        case EPlayerDirection::Down:  m_sprite.setScale(scale.x, scale.y); m_sprite.setRotation(90.0F); break;
+        case EPlayerDirection::Left:  m_sprite.setScale(-scale.x, scale.y); m_sprite.setRotation(0.0F); break;
+        }
+    }
+
+    void Player::Draw(sf::RenderWindow& window)
+    {
+        m_sprite.setPosition(OurVectorToSf(m_position));
+        ApplySpriteTransform();
+        window.draw(m_sprite);
+    }
+
+    bool Player::HasCollisionWithScreenBorder() const
+    {
+        return (m_position.x - k_PlayerRadius < 0.0F) ||
+            (m_position.x + k_PlayerRadius > k_ScreenWidthF) ||
+            (m_position.y - k_PlayerRadius < 0.0F) ||
+            (m_position.y + k_PlayerRadius > k_ScreenHeightF);
+    }
+
+    void Player::AddSpeed(float delta)
+    {
+        m_speed += delta;
+        if (m_speed < 0.0F)
+        {
+            m_speed = 0.0F;
+        }
     }
 }

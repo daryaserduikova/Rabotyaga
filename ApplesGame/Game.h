@@ -2,28 +2,44 @@
 #include <SFML/Graphics.hpp>
 
 #include "AudioManager.h"
-#include "GameState.h"
+#include "Apple.h"
+#include "GameMode.h"
+#include "Player.h"
 #include "Resources.h"
 #include "UI.h"
 
 namespace ApplesGame
 {
-    struct Game
+    class Game
     {
-        GameState state;
+    public:
+        bool Init();
 
-        Resources resources;
-        UIState ui;
+        // ќбработка только игровых событий (перезапуск на SPACE)
+        void HandleEvent(const sf::Event& event);
 
-        sf::Sprite backgroundSprite;
-        sf::Sprite menuBackgroundSprite;
+        void Update(float dtSeconds);
+        void Draw(sf::RenderWindow& window);
 
-        AudioManager audio;
+        void Shutdown();
+
+    private:
+        void ResetGameplay();
+        void UpdatePlaying(float dtSeconds);
+        void OnAppleEaten();
+
+    private:
+        EGameMode m_mode = EGameMode::MainMenu;
+        int m_score = 0;
+
+        Player m_player;
+        Apple m_apple;
+
+        Resources m_resources;
+        UIState m_ui;
+        AudioManager m_audio;
+
+        sf::Sprite m_backgroundSprite;
+        sf::Sprite m_menuBackgroundSprite;
     };
-
-    bool InitGame(Game& game);
-    void ResetGameplay(Game& game);
-    void HandleInput(Game& game);
-    void UpdateGame(Game& game, float deltaTimeSeconds);
-    void DrawGame(Game& game, sf::RenderWindow& window);
 }

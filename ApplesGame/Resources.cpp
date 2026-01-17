@@ -1,43 +1,43 @@
 #include "Resources.h"
+
 #include "Constants.h"
-#include <string>
+#include "Logger.h"
 
 namespace ApplesGame
 {
-    bool LoadResources(Resources& r)
+    bool Resources::LoadTexture(sf::Texture& t, const std::string& path)
     {
-        const std::string base = k_ResourcesPath;
-
-        if (!r.playerTexture.loadFromFile(base + "Player.png"))
+        if (!t.loadFromFile(path))
         {
+            LogError("Failed to load texture: " + path);
             return false;
         }
-
-        if (!r.appleTexture.loadFromFile(base + "Apple.png")) 
-        {
-            return false;
-        }
-
-        if (!r.backgroundTexture.loadFromFile(base + "Background.png")) 
-        {
-            return false;
-        }
-
-        if (!r.menuBackgroundTexture.loadFromFile(base + "MenuBackground.png")) 
-        {
-            return false;
-        }
-
-        if (!r.fontUi.loadFromFile(base + k_FontPath)) 
-        {
-            return false;
-        }
-
-        if (!r.fontTitle.loadFromFile(base + "Fonts/ContraPhobotech.otf")) 
-        {
-            return false;
-        }
-
         return true;
+    }
+
+    bool Resources::LoadFont(sf::Font& f, const std::string& path)
+    {
+        if (!f.loadFromFile(path))
+        {
+            LogError("Failed to load font: " + path);
+            return false;
+        }
+        return true;
+    }
+
+    bool Resources::Load(const std::string& basePath)
+    {
+        bool ok = true;
+
+        ok = LoadTexture(m_playerTexture, basePath + "Player.png") && ok;
+        ok = LoadTexture(m_appleTexture, basePath + "Apple.png") && ok;
+
+        ok = LoadTexture(m_backgroundTexture, basePath + "Background.png") && ok;
+        ok = LoadTexture(m_menuBackgroundTexture, basePath + "MenuBackground.png") && ok;
+
+        ok = LoadFont(m_fontUi, basePath + k_FontPath) && ok;
+        ok = LoadFont(m_fontTitle, basePath + "Fonts/ContraPhobotech.otf") && ok;
+
+        return ok;
     }
 }

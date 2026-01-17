@@ -4,7 +4,6 @@
 #include <string>
 
 #include "Constants.h"
-#include "Resources.h"
 
 namespace ApplesGame
 {
@@ -27,6 +26,16 @@ namespace ApplesGame
         text.setFillColor(textColor);
     }
 
+    void SetupCenteredText(sf::Text& text, float x, float y)
+    {
+        const sf::FloatRect bounds = text.getLocalBounds();
+        text.setOrigin(
+            bounds.left + bounds.width / 2.0F,
+            bounds.top + bounds.height / 2.0F
+        );
+        text.setPosition(x, y);
+    }
+
     static sf::Text MakeCenteredText(
         const char* string,
         const sf::Font& font,
@@ -41,14 +50,13 @@ namespace ApplesGame
         return text;
     }
 
-    void InitUI(UIState& ui, const Resources& resources)
+    void InitUI(UIState& ui, const sf::Font& uiFont, const sf::Font& titleFont)
     {
         // HUD (Score)
-        ui.scoreText.setFont(resources.fontUi);
+        ui.scoreText.setFont(uiFont);
         ui.scoreText.setCharacterSize(24);
         ui.scoreText.setFillColor(sf::Color(255, 255, 255, 160));
         ui.scoreText.setPosition(24.0F, 18.0F);
-
         ui.lastScore = -1;
 
         // Screen texts
@@ -59,7 +67,7 @@ namespace ApplesGame
 
         ui.menuTitleText = MakeCenteredText(
             "RABOTYAGA",
-            resources.fontTitle,
+            titleFont,
             k_TitleSize,
             sf::Color::White,
             k_ScreenWidthF / 2.0F,
@@ -68,7 +76,7 @@ namespace ApplesGame
 
         ui.menuContinueText = MakeCenteredText(
             "Press SPACE to continue",
-            resources.fontUi,
+            uiFont,
             k_ContinueSize,
             sf::Color(200, 200, 200, 200),
             k_ScreenWidthF / 2.0F,
@@ -77,7 +85,7 @@ namespace ApplesGame
 
         ui.gameOverText = MakeCenteredText(
             "GAME OVER",
-            resources.fontTitle,
+            titleFont,
             k_GameOverSize,
             sf::Color::Red,
             k_ScreenWidthF / 2.0F,
@@ -86,7 +94,7 @@ namespace ApplesGame
 
         ui.restartText = MakeCenteredText(
             "Press SPACE to continue",
-            resources.fontUi,
+            uiFont,
             k_RestartSize,
             sf::Color(200, 200, 200, 200),
             k_ScreenWidthF / 2.0F,
@@ -96,13 +104,14 @@ namespace ApplesGame
         ui.blinkTimerSeconds = 0.0F;
     }
 
-    void UpdateUI(UIState& ui, const GameState& state)
+    void UpdateUI(UIState& ui, const UIModel& model)
     {
-        // Update score text only when it changes
-        if (state.score != ui.lastScore)
+        (void)model.mode; // сейчас UI режим не использует, но модель готова
+
+        if (model.score != ui.lastScore)
         {
-            ui.lastScore = state.score;
-            ui.scoreText.setString("Score: " + std::to_string(state.score));
+            ui.lastScore = model.score;
+            ui.scoreText.setString("Score: " + std::to_string(model.score));
         }
     }
 
@@ -132,15 +141,5 @@ namespace ApplesGame
     {
         window.draw(ui.gameOverText);
         window.draw(ui.restartText);
-    }
-
-    void SetupCenteredText(sf::Text& text, float x, float y)
-    {
-        const sf::FloatRect bounds = text.getLocalBounds();
-        text.setOrigin(
-            bounds.left + bounds.width / 2.0F,
-            bounds.top + bounds.height / 2.0F
-        );
-        text.setPosition(x, y);
     }
 }

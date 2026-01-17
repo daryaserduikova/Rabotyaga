@@ -6,24 +6,30 @@
 
 namespace ApplesGame
 {
-    enum class EPlayerDirection
+    enum class EPlayerDirection { Right = 0, Up, Left, Down };
+
+    class Player
     {
-        Right = 0,
-        Up,
-        Left,
-        Down
+    public:
+        void Reset(const sf::Texture& texture);
+
+        void HandleInput();
+        void Update(float dtSeconds);
+        void Draw(sf::RenderWindow& window);
+
+        bool HasCollisionWithScreenBorder() const;
+
+        const Position2D& GetPosition() const { return m_position; }
+        float GetRadius() const { return k_PlayerRadius; }
+
+        void AddSpeed(float delta);
+
+    private:
+        void ApplySpriteTransform();
+
+        Position2D m_position{};
+        float m_speed = k_InitialSpeed;
+        EPlayerDirection m_direction = EPlayerDirection::Right;
+        sf::Sprite m_sprite;
     };
-
-    struct Player
-    {
-        Position2D position;
-        float speed = k_InitialSpeed;
-        EPlayerDirection direction = EPlayerDirection::Right;
-        sf::Sprite sprite;
-    };
-
-    void InitPlayer(Player& player, const sf::Texture& texture);
-    void UpdatePlayer(Player& player, float deltaTimeSeconds);
-
-    bool HasPlayerCollisionWithScreenBorder(const Player& player);
 }

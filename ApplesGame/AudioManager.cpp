@@ -8,68 +8,79 @@ namespace ApplesGame
         return std::max(0.0F, std::min(1.0F, v));
     }
 
+    AudioManager::~AudioManager()
+    {
+        Shutdown();
+    }
+
     bool AudioManager::Init(const std::string& resourcesPath)
     {
         const bool isMusicLoaded =
-            backgroundMusic_.openFromFile(resourcesPath + "Audio/backgroundMusic.wav");
+            m_backgroundMusic.openFromFile(resourcesPath + "Audio/backgroundMusic.wav");
 
         const bool isEatAppleLoaded =
-            eatAppleBuffer_.loadFromFile(resourcesPath + "Audio/EatApple.wav");
+            m_eatAppleBuffer.loadFromFile(resourcesPath + "Audio/EatApple.wav");
 
         if (!isMusicLoaded || !isEatAppleLoaded)
         {
             return false;
         }
 
-        eatAppleSound_.setBuffer(eatAppleBuffer_);
-        backgroundMusic_.setLoop(true);
+        m_eatAppleSound.setBuffer(m_eatAppleBuffer);
+        m_backgroundMusic.setLoop(true);
 
-        SetMusicVolume(musicVolume01_);
-        SetSfxVolume(sfxVolume01_);
+        SetMusicVolume(m_musicVolume01);
+        SetSfxVolume(m_sfxVolume01);
 
         return true;
     }
 
+    void AudioManager::Shutdown()
+    {
+        m_eatAppleSound.stop();
+        m_backgroundMusic.stop();
+    }
+
     void AudioManager::SetMusicVolume(float volume01)
     {
-        musicVolume01_ = Clamp01(volume01);
-        backgroundMusic_.setVolume(musicVolume01_ * k_MaxMusicVolume);
+        m_musicVolume01 = Clamp01(volume01);
+        m_backgroundMusic.setVolume(m_musicVolume01 * k_MaxMusicVolume);
     }
 
     void AudioManager::SetSfxVolume(float volume01)
     {
-        sfxVolume01_ = Clamp01(volume01);
-        eatAppleSound_.setVolume(sfxVolume01_ * k_MaxSfxVolume);
+        m_sfxVolume01 = Clamp01(volume01);
+        m_eatAppleSound.setVolume(m_sfxVolume01 * k_MaxSfxVolume);
     }
 
     void AudioManager::PlayMusic()
     {
-        if (backgroundMusic_.getStatus() != sf::Music::Playing)
+        if (m_backgroundMusic.getStatus() != sf::Music::Playing)
         {
-            backgroundMusic_.play();
+            m_backgroundMusic.play();
         }
     }
 
     void AudioManager::PauseMusic()
     {
-        if (backgroundMusic_.getStatus() == sf::Music::Playing)
+        if (m_backgroundMusic.getStatus() == sf::Music::Playing)
         {
-            backgroundMusic_.pause();
+            m_backgroundMusic.pause();
         }
     }
 
     void AudioManager::StopMusic()
     {
-        backgroundMusic_.stop();
+        m_backgroundMusic.stop();
     }
 
     void AudioManager::PlayEatApple()
     {
-        eatAppleSound_.play();
+        m_eatAppleSound.play();
     }
 
     bool AudioManager::IsMusicPlaying() const
     {
-        return backgroundMusic_.getStatus() == sf::Music::Playing;
+        return m_backgroundMusic.getStatus() == sf::Music::Playing;
     }
 }

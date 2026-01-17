@@ -1,157 +1,143 @@
 ﻿#include "Game.h"
+
 #include "Constants.h"
 #include "Math.h"
 #include "RenderHelpers.h"
-#include "UI.h"
 
 namespace ApplesGame
 {
-    static void UpdatePlaying(Game& game, float deltaTimeSeconds)
+    bool Game::Init()
     {
-        HandleInput(game);
-        UpdatePlayer(game.state.player, deltaTimeSeconds);
-
-        if (HasPlayerCollisionWithScreenBorder(game.state.player))
-        {
-            game.state.mode = EGameMode::GameOver;
-            game.ui.blinkTimerSeconds = 0.0F; // restart blinking
-            return;
-        }
-
-        if (IsCirclesCollide(
-            game.state.player.position, k_PlayerRadius,
-            game.state.apple.position, k_AppleRadius))
-        {
-            game.state.score++;
-            game.state.player.speed += k_Acceleration;
-
-            game.audio.PlayEatApple();
-            InitApple(game.state.apple, game.resources.appleTexture);
-
-            UpdateUI(game.ui, game.state);
-        }
-    }
-
-    bool InitGame(Game& game)
-    {
-        if (!LoadResources(game.resources))
+        if (!m_resources.Load(k_ResourcesPath))
         {
             return false;
         }
 
-        if (!game.audio.Init(k_ResourcesPath))
+        if (!m_audio.Init(k_ResourcesPath))
         {
             return false;
         }
-        game.audio.PlayMusic();
+        m_audio.PlayMusic();
 
-        game.backgroundSprite.setTexture(game.resources.backgroundTexture);
-        FitSpriteToScreen(game.backgroundSprite, game.resources.backgroundTexture);
+        m_backgroundSprite.setTexture(m_resources.GetBackgroundTexture());
+        FitSpriteToScreen(m_backgroundSprite, m_resources.GetBackgroundTexture());
 
-        game.menuBackgroundSprite.setTexture(game.resources.menuBackgroundTexture);
-        FitSpriteToScreen(game.menuBackgroundSprite, game.resources.menuBackgroundTexture);
+        m_menuBackgroundSprite.setTexture(m_resources.GetMenuBackgroundTexture());
+        FitSpriteToScreen(m_menuBackgroundSprite, m_resources.GetMenuBackgroundTexture());
 
-        InitUI(game.ui, game.resources);
+        InitUI(m_ui, m_resources.GetUiFont(), m_resources.GetTitleFont());
 
-        ResetGameplay(game);
-
-        game.state.mode = EGameMode::MainMenu;
-        game.ui.blinkTimerSeconds = 0.0F;
+        ResetGameplay();
+        m_mode = EGameMode::MainMenu;
+        m_ui.blinkTimerSeconds = 0.0F;
 
         return true;
     }
 
-    void ResetGameplay(Game& game)
+    void Game::Shutdown()
     {
-        InitPlayer(game.state.player, game.resources.playerTexture);
-        InitApple(game.state.apple, game.resources.appleTexture);
-
-        game.state.score = 0;
-        UpdateUI(game.ui, game.state);
+        m_audio.Shutdown();
     }
 
-    void HandleInput(Game& game)
+    void Game::ResetGameplay()
     {
-        if (game.state.mode != EGameMode::Playing)
+        m_player.Reset(m_resources.GetPlayerTexture());
+        m_apple.Respawn(m_resources.GetAppleTexture());
+
+        m_score = 0;
+
+        UIModel model;
+        model.score = m_score;
+        model.mode = m_mode;
+        UpdateUI(m_ui, model);
+    }
+
+    void Game::HandleEvent(const sf::Event& event)
+    {
+        if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
         {
+            if (m_mode == EGameMode::MainMenu || m_mode == EGameMode::GameOver)
+            {
+                ResetGameplay();
+                m_mode = EGameMode::Playing;
+            }
+        }
+    }
+
+    void Game::OnAppleEaten()
+    {
+        m_score++;
+        m_player.AddSpeed(k_Acceleration);
+
+        m_audio.PlayEatApple();
+        m_apple.Respawn(m_resources.GetAppleTexture());
+    }
+
+    void Game::UpdatePlaying(float dtSeconds)
+    {
+        m_player.HandleInput();
+        m_player.Update(dtSeconds);
+
+        if (m_player.HasCollisionWithScreenBorder())
+        {
+            m_mode = EGameMode::GameOver;
+            m_ui.blinkTimerSeconds = 0.0F;
             return;
         }
 
-        Player& player = game.state.player;
-
-        const bool rightPressed =
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::D);
-
-        const bool upPressed =
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-
-        const bool leftPressed =
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::A);
-
-        const bool downPressed =
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::S);
-
-        if (rightPressed)
+        if (IsCirclesCollide(
+            m_player.GetPosition(), m_player.GetRadius(),
+            m_apple.GetPosition(), m_apple.GetRadius()))
         {
-            player.direction = EPlayerDirection::Right;
-        }
-        else if (upPressed)
-        {
-            player.direction = EPlayerDirection::Up;
-        }
-        else if (leftPressed)
-        {
-            player.direction = EPlayerDirection::Left;
-        }
-        else if (downPressed)
-        {
-            player.direction = EPlayerDirection::Down;
+            OnAppleEaten();
         }
     }
 
-    void UpdateGame(Game& game, float deltaTimeSeconds)
+    void Game::Update(float dtSeconds)
     {
-        switch (game.state.mode)
+        switch (m_mode)
         {
         case EGameMode::MainMenu:
-            UpdateMenuUI(game.ui, deltaTimeSeconds);
+            UpdateMenuUI(m_ui, dtSeconds);
             break;
 
         case EGameMode::Playing:
-            UpdatePlaying(game, deltaTimeSeconds);
+            UpdatePlaying(dtSeconds);
             break;
 
         case EGameMode::GameOver:
-            UpdateGameOverUI(game.ui, deltaTimeSeconds);
+            UpdateGameOverUI(m_ui, dtSeconds);
             break;
         }
+
+        UIModel model;
+        model.score = m_score;
+        model.mode = m_mode;
+        UpdateUI(m_ui, model);
     }
 
-    void DrawGame(Game& game, sf::RenderWindow& window)
+    void Game::Draw(sf::RenderWindow& window)
     {
-        if (game.state.mode == EGameMode::MainMenu)
+        if (m_mode == EGameMode::MainMenu)
         {
-            DrawMenuUI(game.ui, window, game.menuBackgroundSprite);
+            DrawMenuUI(m_ui, window, m_menuBackgroundSprite);
             return;
         }
 
-        window.draw(game.backgroundSprite);
+        // 1) Background
+        window.draw(m_backgroundSprite);
 
-        DrawUI(game.ui, window);
+        // 2) World
+        m_player.Draw(window);
+        m_apple.Draw(window);
 
-        game.state.player.sprite.setPosition(OurVectorToSf(game.state.player.position));
-        ApplyPlayerSpriteTransform(game.state.player);
-        window.draw(game.state.player.sprite);
+        // 3) UI over world
+        DrawUI(m_ui, window);
 
-        DrawApple(game.state.apple, window);
-
-        if (game.state.mode == EGameMode::GameOver)
+        // 4) Overlay
+        if (m_mode == EGameMode::GameOver)
         {
-            DrawGameOverOverlay(game.ui, window);
+            DrawGameOverOverlay(m_ui, window);
         }
     }
 }

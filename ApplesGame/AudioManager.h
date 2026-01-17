@@ -7,6 +7,8 @@ namespace ApplesGame
     class AudioManager
     {
     public:
+        ~AudioManager();
+
         bool Init(const std::string& resourcesPath);
 
         void PlayMusic();
@@ -20,17 +22,17 @@ namespace ApplesGame
 
         bool IsMusicPlaying() const;
 
+        void Shutdown();
+
     private:
-        sf::Music backgroundMusic_;
+        sf::Music m_backgroundMusic;
 
-        sf::SoundBuffer eatAppleBuffer_;
-        sf::Sound eatAppleSound_;
+        sf::SoundBuffer m_eatAppleBuffer;
+        sf::Sound m_eatAppleSound;
 
-        /// Normalized volume levels (0..1)
-        float musicVolume01_ = 0.30F;
-        float sfxVolume01_ = 0.60F;
+        float m_musicVolume01 = 0.30F;
+        float m_sfxVolume01 = 0.60F;
 
-        // Maximum physical volume levels
         static constexpr float k_MaxMusicVolume = 25.0F;
         static constexpr float k_MaxSfxVolume = 35.0F;
     };

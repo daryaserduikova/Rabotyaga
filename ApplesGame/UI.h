@@ -1,11 +1,9 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "GameState.h"
+#include "UIModel.h"
 
 namespace ApplesGame
 {
-    struct Resources;
-
     struct UIState
     {
         // HUD
@@ -23,9 +21,9 @@ namespace ApplesGame
         float blinkTimerSeconds = 0.0F;
     };
 
-    void InitUI(UIState& ui, const Resources& resources);
+    void InitUI(UIState& ui, const sf::Font& uiFont, const sf::Font& titleFont);
 
-    void UpdateUI(UIState& ui, const GameState& state);
+    void UpdateUI(UIState& ui, const UIModel& model);
     void DrawUI(UIState& ui, sf::RenderWindow& window);
 
     // Screen UI (Menu/GameOver)
