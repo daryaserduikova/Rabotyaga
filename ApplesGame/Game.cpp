@@ -8,24 +8,24 @@ namespace ApplesGame
 {
     bool Game::Init()
     {
-        if (!m_resources.Load(k_ResourcesPath))
+        if (!m_resources.Load(Paths::Resources))
         {
             return false;
         }
 
-        if (!m_audio.Init(k_ResourcesPath))
+        if (!m_audio.Init(Paths::Resources))
         {
             return false;
         }
         m_audio.PlayMusic();
 
-        m_backgroundSprite.setTexture(m_resources.GetBackgroundTexture());
-        FitSpriteToScreen(m_backgroundSprite, m_resources.GetBackgroundTexture());
+        m_backgroundSprite.setTexture(m_resources.BackgroundTexture());
+        FitSpriteToScreen(m_backgroundSprite, m_resources.BackgroundTexture());
 
-        m_menuBackgroundSprite.setTexture(m_resources.GetMenuBackgroundTexture());
-        FitSpriteToScreen(m_menuBackgroundSprite, m_resources.GetMenuBackgroundTexture());
+        m_menuBackgroundSprite.setTexture(m_resources.MenuBackgroundTexture());
+        FitSpriteToScreen(m_menuBackgroundSprite, m_resources.MenuBackgroundTexture());
 
-        InitUI(m_ui, m_resources.GetUiFont(), m_resources.GetTitleFont());
+        InitUI(m_ui, m_resources.UiFont(), m_resources.TitleFont());
 
         ResetGameplay();
         m_mode = EGameMode::MainMenu;
@@ -41,8 +41,8 @@ namespace ApplesGame
 
     void Game::ResetGameplay()
     {
-        m_player.Reset(m_resources.GetPlayerTexture());
-        m_apple.Respawn(m_resources.GetAppleTexture());
+        m_player.Reset(m_resources.PlayerTexture());
+        m_apple.Respawn(m_resources.AppleTexture());
 
         m_score = 0;
 
@@ -67,16 +67,16 @@ namespace ApplesGame
     void Game::OnAppleEaten()
     {
         m_score++;
-        m_player.AddSpeed(k_Acceleration);
+        m_player.AddSpeed(PlayerConfig::Acceleration);
 
         m_audio.PlayEatApple();
-        m_apple.Respawn(m_resources.GetAppleTexture());
+        m_apple.Respawn(m_resources.AppleTexture());
     }
 
-    void Game::UpdatePlaying(float dtSeconds)
+    void Game::UpdatePlaying(float dt)
     {
         m_player.HandleInput();
-        m_player.Update(dtSeconds);
+        m_player.Update(dt);
 
         if (m_player.HasCollisionWithScreenBorder())
         {
@@ -86,27 +86,27 @@ namespace ApplesGame
         }
 
         if (IsCirclesCollide(
-            m_player.GetPosition(), m_player.GetRadius(),
-            m_apple.GetPosition(), m_apple.GetRadius()))
+            m_player.Position(), m_player.Radius(),
+            m_apple.Position(), m_apple.Radius()))
         {
             OnAppleEaten();
         }
     }
 
-    void Game::Update(float dtSeconds)
+    void Game::Update(float dt)
     {
         switch (m_mode)
         {
         case EGameMode::MainMenu:
-            UpdateMenuUI(m_ui, dtSeconds);
+            UpdateMenuUI(m_ui, dt);
             break;
 
         case EGameMode::Playing:
-            UpdatePlaying(dtSeconds);
+            UpdatePlaying(dt);
             break;
 
         case EGameMode::GameOver:
-            UpdateGameOverUI(m_ui, dtSeconds);
+            UpdateGameOverUI(m_ui, dt);
             break;
         }
 
@@ -124,17 +124,13 @@ namespace ApplesGame
             return;
         }
 
-        // 1) Background
         window.draw(m_backgroundSprite);
 
-        // 2) World
         m_player.Draw(window);
         m_apple.Draw(window);
 
-        // 3) UI over world
         DrawUI(m_ui, window);
 
-        // 4) Overlay
         if (m_mode == EGameMode::GameOver)
         {
             DrawGameOverOverlay(m_ui, window);

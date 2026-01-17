@@ -10,7 +10,7 @@ int main()
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     sf::RenderWindow window(
-        sf::VideoMode(ApplesGame::k_ScreenWidth, ApplesGame::k_ScreenHeight),
+        sf::VideoMode(ApplesGame::Screen::Width, ApplesGame::Screen::Height),
         "RABOTYAGA"
     );
     window.setFramerateLimit(60);
@@ -26,13 +26,13 @@ int main()
 
     while (window.isOpen())
     {
-        float currentTimeSeconds = clock.getElapsedTime().asSeconds();
+        const float currentTimeSeconds = clock.getElapsedTime().asSeconds();
         float dt = currentTimeSeconds - previousTimeSeconds;
         previousTimeSeconds = currentTimeSeconds;
 
-        if (dt > ApplesGame::k_MaxDtSeconds)
+        if (dt > ApplesGame::Screen::MaxDtSeconds)
         {
-            dt = ApplesGame::k_MaxDtSeconds;
+            dt = ApplesGame::Screen::MaxDtSeconds;
         }
 
         sf::Event event{};

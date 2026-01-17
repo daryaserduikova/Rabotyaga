@@ -15,7 +15,6 @@ namespace ApplesGame
     public:
         bool Init();
 
-        // ќбработка только игровых событий (перезапуск на SPACE)
         void HandleEvent(const sf::Event& event);
 
         void Update(float dtSeconds);

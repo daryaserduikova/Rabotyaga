@@ -12,8 +12,8 @@ namespace ApplesGame
         void Respawn(const sf::Texture& texture);
         void Draw(sf::RenderWindow& window);
 
-        const Position2D& GetPosition() const { return m_position; }
-        float GetRadius() const { return k_AppleRadius; }
+        const Position2D& Position() const { return m_position; }
+        float Radius() const { return AppleConfig::Radius; }
 
     private:
         Position2D m_position{};

@@ -10,56 +10,49 @@ namespace ApplesGame
     static void ApplyBlinkToText(
         sf::Text& text,
         float& blinkTimerSeconds,
-        float deltaTimeSeconds,
-        float blinkPeriodSeconds = 1.0F,
+        float dt,
+        float period = 1.0F,
         sf::Uint8 visibleAlpha = 200,
         sf::Uint8 hiddenAlpha = 40)
     {
-        blinkTimerSeconds += deltaTimeSeconds;
+        blinkTimerSeconds += dt;
+        const float phase = std::fmod(blinkTimerSeconds, period);
 
-        const float blinkPhaseTime = std::fmod(blinkTimerSeconds, blinkPeriodSeconds);
-
-        sf::Color textColor = text.getFillColor();
-        const float halfPeriodSeconds = blinkPeriodSeconds * 0.5F;
-        textColor.a = (blinkPhaseTime < halfPeriodSeconds) ? visibleAlpha : hiddenAlpha;
-
-        text.setFillColor(textColor);
+        sf::Color c = text.getFillColor();
+        c.a = (phase < period * 0.5F) ? visibleAlpha : hiddenAlpha;
+        text.setFillColor(c);
     }
 
     void SetupCenteredText(sf::Text& text, float x, float y)
     {
-        const sf::FloatRect bounds = text.getLocalBounds();
-        text.setOrigin(
-            bounds.left + bounds.width / 2.0F,
-            bounds.top + bounds.height / 2.0F
-        );
+        const sf::FloatRect b = text.getLocalBounds();
+        text.setOrigin(b.left + b.width / 2.0F, b.top + b.height / 2.0F);
         text.setPosition(x, y);
     }
 
     static sf::Text MakeCenteredText(
-        const char* string,
+        const char* str,
         const sf::Font& font,
         unsigned size,
         sf::Color color,
         float x,
         float y)
     {
-        sf::Text text(string, font, size);
-        text.setFillColor(color);
-        SetupCenteredText(text, x, y);
-        return text;
+        sf::Text t(str, font, size);
+        t.setFillColor(color);
+        SetupCenteredText(t, x, y);
+        return t;
     }
 
     void InitUI(UIState& ui, const sf::Font& uiFont, const sf::Font& titleFont)
     {
-        // HUD (Score)
         ui.scoreText.setFont(uiFont);
         ui.scoreText.setCharacterSize(24);
         ui.scoreText.setFillColor(sf::Color(255, 255, 255, 160));
         ui.scoreText.setPosition(24.0F, 18.0F);
+
         ui.lastScore = -1;
 
-        // Screen texts
         constexpr unsigned k_TitleSize = 45;
         constexpr unsigned k_ContinueSize = 21;
         constexpr unsigned k_GameOverSize = 36;
@@ -70,8 +63,8 @@ namespace ApplesGame
             titleFont,
             k_TitleSize,
             sf::Color::White,
-            k_ScreenWidthF / 2.0F,
-            k_ScreenHeightF / 2.0F - 120.0F
+            Screen::WidthF / 2.0F,
+            Screen::HeightF / 2.0F - 120.0F
         );
 
         ui.menuContinueText = MakeCenteredText(
@@ -79,8 +72,8 @@ namespace ApplesGame
             uiFont,
             k_ContinueSize,
             sf::Color(200, 200, 200, 200),
-            k_ScreenWidthF / 2.0F,
-            k_ScreenHeightF / 2.0F - 60.0F
+            Screen::WidthF / 2.0F,
+            Screen::HeightF / 2.0F - 60.0F
         );
 
         ui.gameOverText = MakeCenteredText(
@@ -88,8 +81,8 @@ namespace ApplesGame
             titleFont,
             k_GameOverSize,
             sf::Color::Red,
-            k_ScreenWidthF / 2.0F,
-            k_ScreenHeightF / 2.0F - 40.0F
+            Screen::WidthF / 2.0F,
+            Screen::HeightF / 2.0F - 40.0F
         );
 
         ui.restartText = MakeCenteredText(
@@ -97,8 +90,8 @@ namespace ApplesGame
             uiFont,
             k_RestartSize,
             sf::Color(200, 200, 200, 200),
-            k_ScreenWidthF / 2.0F,
-            k_ScreenHeightF / 2.0F + 20.0F
+            Screen::WidthF / 2.0F,
+            Screen::HeightF / 2.0F + 20.0F
         );
 
         ui.blinkTimerSeconds = 0.0F;
@@ -106,7 +99,7 @@ namespace ApplesGame
 
     void UpdateUI(UIState& ui, const UIModel& model)
     {
-        (void)model.mode; // сейчас UI режим не использует, но модель готова
+        (void)model.mode;
 
         if (model.score != ui.lastScore)
         {
@@ -120,9 +113,9 @@ namespace ApplesGame
         window.draw(ui.scoreText);
     }
 
-    void UpdateMenuUI(UIState& ui, float deltaTimeSeconds)
+    void UpdateMenuUI(UIState& ui, float dt)
     {
-        ApplyBlinkToText(ui.menuContinueText, ui.blinkTimerSeconds, deltaTimeSeconds);
+        ApplyBlinkToText(ui.menuContinueText, ui.blinkTimerSeconds, dt);
     }
 
     void DrawMenuUI(UIState& ui, sf::RenderWindow& window, const sf::Sprite& menuBackground)
@@ -132,9 +125,9 @@ namespace ApplesGame
         window.draw(ui.menuContinueText);
     }
 
-    void UpdateGameOverUI(UIState& ui, float deltaTimeSeconds)
+    void UpdateGameOverUI(UIState& ui, float dt)
     {
-        ApplyBlinkToText(ui.restartText, ui.blinkTimerSeconds, deltaTimeSeconds);
+        ApplyBlinkToText(ui.restartText, ui.blinkTimerSeconds, dt);
     }
 
     void DrawGameOverOverlay(UIState& ui, sf::RenderWindow& window)

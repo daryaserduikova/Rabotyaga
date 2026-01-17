@@ -9,17 +9,19 @@ namespace ApplesGame
     public:
         bool Load(const std::string& basePath);
 
-        const sf::Texture& GetPlayerTexture() const { return m_playerTexture; }
-        const sf::Texture& GetAppleTexture() const { return m_appleTexture; }
-        const sf::Texture& GetBackgroundTexture() const { return m_backgroundTexture; }
-        const sf::Texture& GetMenuBackgroundTexture() const { return m_menuBackgroundTexture; }
+        // Textures
+        const sf::Texture& PlayerTexture() const { return m_playerTexture; }
+        const sf::Texture& AppleTexture() const { return m_appleTexture; }
+        const sf::Texture& BackgroundTexture() const { return m_backgroundTexture; }
+        const sf::Texture& MenuBackgroundTexture() const { return m_menuBackgroundTexture; }
 
-        const sf::Font& GetUiFont() const { return m_fontUi; }
-        const sf::Font& GetTitleFont() const { return m_fontTitle; }
+        // Fonts
+        const sf::Font& UiFont() const { return m_fontUi; }
+        const sf::Font& TitleFont() const { return m_fontTitle; }
 
     private:
-        bool LoadTexture(sf::Texture& t, const std::string& path);
-        bool LoadFont(sf::Font& f, const std::string& path);
+        bool LoadTexture(sf::Texture& texture, const std::string& path);
+        bool LoadFont(sf::Font& font, const std::string& path);
 
         sf::Texture m_playerTexture;
         sf::Texture m_appleTexture;

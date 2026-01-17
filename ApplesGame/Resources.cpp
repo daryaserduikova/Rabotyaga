@@ -35,7 +35,7 @@ namespace ApplesGame
         ok = LoadTexture(m_backgroundTexture, basePath + "Background.png") && ok;
         ok = LoadTexture(m_menuBackgroundTexture, basePath + "MenuBackground.png") && ok;
 
-        ok = LoadFont(m_fontUi, basePath + k_FontPath) && ok;
+        ok = LoadFont(m_fontUi, basePath + Paths::UiFont) && ok;
         ok = LoadFont(m_fontTitle, basePath + "Fonts/ContraPhobotech.otf") && ok;
 
         return ok;

@@ -19,8 +19,8 @@ namespace ApplesGame
 
         bool HasCollisionWithScreenBorder() const;
 
-        const Position2D& GetPosition() const { return m_position; }
-        float GetRadius() const { return k_PlayerRadius; }
+        const Position2D& Position() const { return m_position; }
+        float Radius() const { return PlayerConfig::Radius; }
 
         void AddSpeed(float delta);
 
@@ -28,7 +28,7 @@ namespace ApplesGame
         void ApplySpriteTransform();
 
         Position2D m_position{};
-        float m_speed = k_InitialSpeed;
+        float m_speed = PlayerConfig::InitialSpeed;
         EPlayerDirection m_direction = EPlayerDirection::Right;
         sf::Sprite m_sprite;
     };

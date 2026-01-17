@@ -4,22 +4,33 @@ namespace ApplesGame
 {
     void Player::Reset(const sf::Texture& texture)
     {
-        m_position = { k_ScreenWidthF / 2.0F, k_ScreenHeightF / 2.0F };
-        m_speed = k_InitialSpeed;
+        m_position = { Screen::WidthF / 2.0F, Screen::HeightF / 2.0F };
+        m_speed = PlayerConfig::InitialSpeed;
         m_direction = EPlayerDirection::Right;
 
         m_sprite.setTexture(texture);
         m_sprite.setOrigin(GetSpriteOrigin(m_sprite, { 0.5F, 0.5F }));
-        m_sprite.setScale(GetSpriteScale(m_sprite, { k_PlayerSize, k_PlayerSize }));
+        m_sprite.setScale(GetSpriteScale(m_sprite, { PlayerConfig::Size, PlayerConfig::Size }));
         m_sprite.setRotation(0.0F);
     }
 
     void Player::HandleInput()
     {
-        const bool right = sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D);
-        const bool up = sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-        const bool left = sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A);
-        const bool down = sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+        const bool right =
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+
+        const bool up =
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+
+        const bool left =
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+
+        const bool down =
+            sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
+            sf::Keyboard::isKeyPressed(sf::Keyboard::S);
 
         if (right) m_direction = EPlayerDirection::Right;
         else if (up) m_direction = EPlayerDirection::Up;
@@ -40,14 +51,29 @@ namespace ApplesGame
 
     void Player::ApplySpriteTransform()
     {
-        const sf::Vector2f scale = GetSpriteScale(m_sprite, { k_PlayerSize, k_PlayerSize });
+        const sf::Vector2f scale = GetSpriteScale(m_sprite, { PlayerConfig::Size, PlayerConfig::Size });
 
         switch (m_direction)
         {
-        case EPlayerDirection::Up:    m_sprite.setScale(scale.x, scale.y); m_sprite.setRotation(-90.0F); break;
-        case EPlayerDirection::Right: m_sprite.setScale(scale.x, scale.y); m_sprite.setRotation(0.0F); break;
-        case EPlayerDirection::Down:  m_sprite.setScale(scale.x, scale.y); m_sprite.setRotation(90.0F); break;
-        case EPlayerDirection::Left:  m_sprite.setScale(-scale.x, scale.y); m_sprite.setRotation(0.0F); break;
+        case EPlayerDirection::Up:
+            m_sprite.setScale(scale.x, scale.y);
+            m_sprite.setRotation(-90.0F);
+            break;
+
+        case EPlayerDirection::Right:
+            m_sprite.setScale(scale.x, scale.y);
+            m_sprite.setRotation(0.0F);
+            break;
+
+        case EPlayerDirection::Down:
+            m_sprite.setScale(scale.x, scale.y);
+            m_sprite.setRotation(90.0F);
+            break;
+
+        case EPlayerDirection::Left:
+            m_sprite.setScale(-scale.x, scale.y);
+            m_sprite.setRotation(0.0F);
+            break;
         }
     }
 
@@ -60,18 +86,15 @@ namespace ApplesGame
 
     bool Player::HasCollisionWithScreenBorder() const
     {
-        return (m_position.x - k_PlayerRadius < 0.0F) ||
-            (m_position.x + k_PlayerRadius > k_ScreenWidthF) ||
-            (m_position.y - k_PlayerRadius < 0.0F) ||
-            (m_position.y + k_PlayerRadius > k_ScreenHeightF);
+        return (m_position.x - PlayerConfig::Radius < 0.0F) ||
+            (m_position.x + PlayerConfig::Radius > Screen::WidthF) ||
+            (m_position.y - PlayerConfig::Radius < 0.0F) ||
+            (m_position.y + PlayerConfig::Radius > Screen::HeightF);
     }
 
     void Player::AddSpeed(float delta)
     {
         m_speed += delta;
-        if (m_speed < 0.0F)
-        {
-            m_speed = 0.0F;
-        }
+        if (m_speed < 0.0F) m_speed = 0.0F;
     }
 }
