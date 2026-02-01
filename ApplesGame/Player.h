@@ -6,7 +6,13 @@
 
 namespace ApplesGame
 {
-    enum class EPlayerDirection { Right = 0, Up, Left, Down };
+    enum class EPlayerDirection
+    {
+        Right = 0,
+        Up,
+        Left,
+        Down
+    };
 
     class Player
     {
@@ -19,17 +25,17 @@ namespace ApplesGame
 
         bool HasCollisionWithScreenBorder() const;
 
-        const Position2D& Position() const { return m_position; }
-        float Radius() const { return PlayerConfig::Radius; }
+        const Position2D& Position() const { return m_Position; }
+        float Radius() const { return PlayerConfig::k_Radius; }
 
         void AddSpeed(float delta);
 
     private:
         void ApplySpriteTransform();
 
-        Position2D m_position{};
-        float m_speed = PlayerConfig::InitialSpeed;
-        EPlayerDirection m_direction = EPlayerDirection::Right;
-        sf::Sprite m_sprite;
+        Position2D m_Position{};
+        float m_Speed = PlayerConfig::k_InitialSpeed;
+        EPlayerDirection m_Direction = EPlayerDirection::Right;
+        sf::Sprite m_Sprite;
     };
 }

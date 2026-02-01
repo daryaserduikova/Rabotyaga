@@ -4,33 +4,34 @@ namespace ApplesGame
 {
     namespace Paths
     {
-        constexpr const char* Resources = "Resources/";
-        constexpr const char* UiFont = "Fonts/Roboto-Regular.ttf";
+        constexpr const char* k_Resources = "Resources/";
+        constexpr const char* k_UiFont = "Fonts/Roboto-Regular.ttf";
+        constexpr const char* k_TitleFont = "Fonts/ContraPhobotech.otf";
     }
 
     namespace Screen
     {
-        constexpr int Width = 800;
-        constexpr int Height = 600;
+        constexpr int k_Width = 800;
+        constexpr int k_Height = 600;
 
-        constexpr float WidthF = static_cast<float>(Width);
-        constexpr float HeightF = static_cast<float>(Height);
+        constexpr float k_WidthF = static_cast<float>(k_Width);
+        constexpr float k_HeightF = static_cast<float>(k_Height);
 
-        constexpr float MaxDtSeconds = 0.1F;
+        constexpr float k_MaxDtSeconds = 0.1F;
     }
 
     namespace PlayerConfig
     {
-        constexpr float InitialSpeed = 200.0F;
-        constexpr float Acceleration = 20.0F;
+        constexpr float k_InitialSpeed = 200.0F;
+        constexpr float k_Acceleration = 20.0F;
 
-        constexpr float Radius = 30.0F;
-        constexpr float Size = Radius * 2.0F;
+        constexpr float k_Radius = 30.0F;
+        constexpr float k_Size = k_Radius * 2.0F;
     }
 
     namespace AppleConfig
     {
-        constexpr float Radius = 20.0F;
-        constexpr float Size = Radius * 2.0F;
+        constexpr float k_Radius = 20.0F;
+        constexpr float k_Size = k_Radius * 2.0F;
     }
 }

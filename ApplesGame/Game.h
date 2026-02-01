@@ -4,6 +4,7 @@
 #include "AudioManager.h"
 #include "Apple.h"
 #include "GameMode.h"
+#include "GameRules.h"
 #include "Player.h"
 #include "Resources.h"
 #include "UI.h"
@@ -22,23 +23,50 @@ namespace ApplesGame
 
         void Shutdown();
 
+        bool ShouldExit() const
+        {
+            return m_RequestExit;
+        }
+
     private:
         void ResetGameplay();
         void UpdatePlaying(float dtSeconds);
-        void OnAppleEaten();
+
+        void AllocateApples(int count);
+        void FreeApples();
+
+        void OnAppleEaten(int appleIndex);
+
+        int GetAppleTargetCountFromRules() const;
+        void EnsureDefaultRules();
+
+        void ApplyChooseSelection();
+        void StartFromChooseMode();
 
     private:
-        EGameMode m_mode = EGameMode::MainMenu;
-        int m_score = 0;
+        EGameMode m_Mode = EGameMode::Splash;
+        bool m_RequestExit = false;
 
-        Player m_player;
-        Apple m_apple;
+        int m_MainMenuIndex = 0;
+        int m_ChooseIndex = 5;
+        int m_GameOverIndex = 0;
 
-        Resources m_resources;
-        UIState m_ui;
-        AudioManager m_audio;
+        float m_SplashTimerSeconds = 0.0F;
 
-        sf::Sprite m_backgroundSprite;
-        sf::Sprite m_menuBackgroundSprite;
+        EGameRule m_Rules = EGameRule::None;
+
+        int m_Score = 0;
+        Player m_Player;
+
+        Apple* m_Apples = nullptr;
+        int m_ApplesCount = 0;
+
+        Resources m_Resources;
+        UIState m_Ui;
+        AudioManager m_Audio;
+
+        sf::Sprite m_BackgroundSprite;
+        sf::Sprite m_MenuBackgroundSprite;
+        sf::Sprite m_SplashSprite;
     };
 }

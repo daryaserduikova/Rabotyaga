@@ -1,5 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <cstdint>
+
 #include "UIModel.h"
 
 namespace ApplesGame
@@ -10,29 +12,39 @@ namespace ApplesGame
         sf::Text scoreText;
         int lastScore = -1;
 
-        // Screens (Menu/GameOver)
-        sf::Text menuTitleText;
-        sf::Text menuContinueText;
+        // Splash
+        sf::Text splashTitleText;
+        sf::Text splashHintText;
 
-        sf::Text gameOverText;
-        sf::Text restartText;
+        // Main menu
+        sf::Text mainTitleText;
+        sf::Text playText;
+        sf::Text exitText;
 
-        // UI animation state
-        float blinkTimerSeconds = 0.0F;
+        // Choose mode
+        sf::Text chooseTitleText;
+        sf::Text chooseListText;
+
+        // Game over
+        sf::Text gameOverTitleText;
+        sf::Text gameOverListText;
     };
 
-    void InitUI(UIState& ui, const sf::Font& uiFont, const sf::Font& titleFont);
-
-    void UpdateUI(UIState& ui, const UIModel& model);
-    void DrawUI(UIState& ui, sf::RenderWindow& window);
-
-    // Screen UI (Menu/GameOver)
-    void UpdateMenuUI(UIState& ui, float deltaTimeSeconds);
-    void DrawMenuUI(UIState& ui, sf::RenderWindow& window, const sf::Sprite& menuBackground);
-
-    void UpdateGameOverUI(UIState& ui, float deltaTimeSeconds);
-    void DrawGameOverOverlay(UIState& ui, sf::RenderWindow& window);
-
-    // Helpers
     void SetupCenteredText(sf::Text& text, float x, float y);
+
+    void InitUI(UIState& ui, const sf::Font& uiFont, const sf::Font& titleFont);
+    void UpdateUI(UIState& ui, const UIModel& model);
+
+    void DrawSplash(
+        UIState& ui,
+        sf::RenderWindow& window,
+        const sf::Sprite& splashSprite,
+        std::uint8_t alpha,
+        float timeSeconds);
+
+    void DrawMainMenu(UIState& ui, sf::RenderWindow& window, const sf::Sprite& menuBackground);
+    void DrawChooseMode(UIState& ui, sf::RenderWindow& window, const sf::Sprite& menuBackground);
+
+    void DrawHud(UIState& ui, sf::RenderWindow& window);
+    void DrawGameOver(UIState& ui, sf::RenderWindow& window);
 }

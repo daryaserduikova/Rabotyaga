@@ -4,7 +4,9 @@ namespace ApplesGame
 {
     enum class EGameMode
     {
-        MainMenu = 0,
+        Splash = 0,
+        MainMenu,
+        ChooseMode,
         Playing,
         GameOver
     };

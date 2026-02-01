@@ -81,7 +81,7 @@
     <ClInclude Include="UI.h">
       <Filter>Sources\UI</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.h">
+    <ClInclude Include="Loggers.h">
       <Filter>Sources\Utils</Filter>
     </ClInclude>
     <ClInclude Include="Math.h">
@@ -89,6 +89,9 @@
     </ClInclude>
     <ClInclude Include="RenderHelpers.h">
       <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="GameRules.h">
+      <Filter>Sources\Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

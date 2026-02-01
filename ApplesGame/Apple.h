@@ -12,11 +12,11 @@ namespace ApplesGame
         void Respawn(const sf::Texture& texture);
         void Draw(sf::RenderWindow& window);
 
-        const Position2D& Position() const { return m_position; }
-        float Radius() const { return AppleConfig::Radius; }
+        const Position2D& Position() const { return m_Position; }
+        float Radius() const { return AppleConfig::k_Radius; }
 
     private:
-        Position2D m_position{};
-        sf::Sprite m_sprite;
+        Position2D m_Position{};
+        sf::Sprite m_Sprite;
     };
 }

@@ -3,5 +3,5 @@
 
 namespace ApplesGame
 {
-    void FitSpriteToScreen(sf::Sprite& sprite, const sf::Texture& texture);
+    void FitSpriteToScreen(sf::Sprite& sprite);
 }

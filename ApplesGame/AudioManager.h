@@ -10,6 +10,7 @@ namespace ApplesGame
         ~AudioManager();
 
         bool Init(const std::string& resourcesPath);
+        void Shutdown();
 
         void PlayMusic();
         void PauseMusic();
@@ -22,18 +23,16 @@ namespace ApplesGame
 
         bool IsMusicPlaying() const;
 
-        void Shutdown();
-
     private:
-        sf::Music m_backgroundMusic;
-
-        sf::SoundBuffer m_eatAppleBuffer;
-        sf::Sound m_eatAppleSound;
-
-        float m_musicVolume01 = 0.30F;
-        float m_sfxVolume01 = 0.60F;
-
         static constexpr float k_MaxMusicVolume = 25.0F;
         static constexpr float k_MaxSfxVolume = 35.0F;
+
+        sf::Music m_BackgroundMusic;
+
+        sf::SoundBuffer m_EatAppleBuffer;
+        sf::Sound m_EatAppleSound;
+
+        float m_MusicVolume01 = 0.30F;
+        float m_SfxVolume01 = 0.60F;
     };
 }

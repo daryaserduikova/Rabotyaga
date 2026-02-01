@@ -5,7 +5,7 @@ namespace ApplesGame
 {
     Position2D GetRandomPositionInScreen(float screenWidth, float screenHeight)
     {
-        return
+        return 
         {
             (std::rand() / static_cast<float>(RAND_MAX)) * screenWidth,
             (std::rand() / static_cast<float>(RAND_MAX)) * screenHeight
@@ -35,7 +35,11 @@ namespace ApplesGame
         }
 
         const sf::Vector2u textureSize = texture->getSize();
-        return { desiredSize.x / textureSize.x, desiredSize.y / textureSize.y };
+        return 
+        {
+            desiredSize.x / static_cast<float>(textureSize.x),
+            desiredSize.y / static_cast<float>(textureSize.y)
+        };
     }
 
     sf::Vector2f GetSpriteOrigin(const sf::Sprite& sprite, const Vector2D& relativePosition)
@@ -47,13 +51,17 @@ namespace ApplesGame
         }
 
         const sf::Vector2u textureSize = texture->getSize();
-        return { relativePosition.x * textureSize.x, relativePosition.y * textureSize.y };
+        return 
+        {
+            relativePosition.x * static_cast<float>(textureSize.x),
+            relativePosition.y * static_cast<float>(textureSize.y)
+        };
     }
 
     sf::Vector2f GetTextOrigin(const sf::Text& text, const Vector2D& relativePosition)
     {
         const sf::FloatRect bounds = text.getLocalBounds();
-        return
+        return 
         {
             (bounds.left + bounds.width) * relativePosition.x,
             (bounds.top + bounds.height) * relativePosition.y

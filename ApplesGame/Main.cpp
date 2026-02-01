@@ -10,7 +10,7 @@ int main()
     std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     sf::RenderWindow window(
-        sf::VideoMode(ApplesGame::Screen::Width, ApplesGame::Screen::Height),
+        sf::VideoMode(ApplesGame::Screen::k_Width, ApplesGame::Screen::k_Height),
         "RABOTYAGA"
     );
     window.setFramerateLimit(60);
@@ -22,24 +22,23 @@ int main()
     }
 
     sf::Clock clock;
-    float previousTimeSeconds = clock.getElapsedTime().asSeconds();
+    float prevSeconds = clock.getElapsedTime().asSeconds();
 
     while (window.isOpen())
     {
-        const float currentTimeSeconds = clock.getElapsedTime().asSeconds();
-        float dt = currentTimeSeconds - previousTimeSeconds;
-        previousTimeSeconds = currentTimeSeconds;
+        const float nowSeconds = clock.getElapsedTime().asSeconds();
+        float dtSeconds = nowSeconds - prevSeconds;
+        prevSeconds = nowSeconds;
 
-        if (dt > ApplesGame::Screen::MaxDtSeconds)
+        if (dtSeconds > ApplesGame::Screen::k_MaxDtSeconds)
         {
-            dt = ApplesGame::Screen::MaxDtSeconds;
+            dtSeconds = ApplesGame::Screen::k_MaxDtSeconds;
         }
 
         sf::Event event{};
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed ||
-                (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
+            if (event.type == sf::Event::Closed)
             {
                 game.Shutdown();
                 window.close();
@@ -49,7 +48,14 @@ int main()
             game.HandleEvent(event);
         }
 
-        game.Update(dt);
+        if (game.ShouldExit())
+        {
+            game.Shutdown();
+            window.close();
+            break;
+        }
+
+        game.Update(dtSeconds);
 
         window.clear();
         game.Draw(window);
