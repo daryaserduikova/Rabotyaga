@@ -5,75 +5,90 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Sources\App">
+      <UniqueIdentifier>{005aeed0-dbf1-4846-9634-59ee9c08ca87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Core">
+      <UniqueIdentifier>{57bc86c2-df25-4197-a37f-7ce0e759315d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Utils">
+      <UniqueIdentifier>{489c1c17-b139-4584-aa34-d178b6445f1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\UI">
+      <UniqueIdentifier>{1557b0b7-7b05-4748-828b-5f01da1e14aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Game">
+      <UniqueIdentifier>{ec439a50-67f3-4416-b94b-6a72ab6e7d17}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GameMain.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Math.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Sources</Filter>
+    <ClCompile Include="Main.cpp">
+      <Filter>Sources\App</Filter>
     </ClCompile>
     <ClCompile Include="Apple.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Game</Filter>
     </ClCompile>
-    <ClCompile Include="UI.cpp">
-      <Filter>Sources</Filter>
+    <ClCompile Include="Player.cpp">
+      <Filter>Sources\Game</Filter>
     </ClCompile>
-    <ClCompile Include="AudioManager.cpp">
-      <Filter>Sources</Filter>
+    <ClCompile Include="Game.cpp">
+      <Filter>Sources\Game</Filter>
     </ClCompile>
     <ClCompile Include="Resources.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Core</Filter>
     </ClCompile>
-    <ClCompile Include="RenderHelpers.cpp">
-      <Filter>Sources</Filter>
+    <ClCompile Include="AudioManager.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>Sources\UI</Filter>
     </ClCompile>
     <ClCompile Include="Loggers.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Math.cpp">
+      <Filter>Sources\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderHelpers.cpp">
+      <Filter>Sources\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Player.h">
-      <Filter>Sources</Filter>
+    <ClInclude Include="Apple.h">
+      <Filter>Sources\Game</Filter>
     </ClInclude>
-    <ClInclude Include="Math.h">
-      <Filter>Sources</Filter>
+    <ClInclude Include="Player.h">
+      <Filter>Sources\Game</Filter>
     </ClInclude>
     <ClInclude Include="Game.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="Apple.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="AudioManager.h">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Game</Filter>
     </ClInclude>
     <ClInclude Include="Constants.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="Resources.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderHelpers.h">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Core</Filter>
     </ClInclude>
     <ClInclude Include="GameMode.h">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.h">
-      <Filter>Sources</Filter>
+    <ClInclude Include="Resources.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioManager.h">
+      <Filter>Sources\Core</Filter>
     </ClInclude>
     <ClInclude Include="UIModel.h">
-      <Filter>Sources</Filter>
+      <Filter>Sources\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Sources\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Math.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderHelpers.h">
+      <Filter>Sources\Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

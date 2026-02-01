@@ -161,7 +161,7 @@
     <ClCompile Include="Apple.cpp" />
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="GameMain.cpp" />
+    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Loggers.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="Player.cpp" />
