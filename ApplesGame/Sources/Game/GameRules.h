@@ -1,3 +1,5 @@
+// @file GameRules.h
+
 #pragma once
 #include <cstdint>
 

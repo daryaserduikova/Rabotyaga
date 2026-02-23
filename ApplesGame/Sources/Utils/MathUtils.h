@@ -19,4 +19,6 @@ namespace ApplesGame
     sf::Vector2f GetSpriteScale(const sf::Sprite& sprite, const Vector2D& desiredSize);
     sf::Vector2f GetSpriteOrigin(const sf::Sprite& sprite, const Vector2D& relativePosition);
     sf::Vector2f GetTextOrigin(const sf::Text& text, const Vector2D& relativePosition);
+
+    float Clamp(float value, float minValue, float maxValue);
 }

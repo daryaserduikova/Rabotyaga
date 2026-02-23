@@ -1,4 +1,6 @@
-﻿#include <SFML/Graphics.hpp>
+﻿// @file main.cpp
+
+#include <SFML/Graphics.hpp>
 #include <cstdlib>
 #include <ctime>
 

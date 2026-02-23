@@ -1,23 +1,11 @@
+// @file AudioManager.cpp
+
 #include "AudioManager.h"
-#include <algorithm>
+
+#include "MathUtils.h"
 
 namespace ApplesGame
 {
-    static float Clamp01(float value)
-    {
-        if (value < 0.0F)
-        {
-            return 0.0F;
-        }
-
-        if (value > 1.0F)
-        {
-            return 1.0F;
-        }
-
-        return value;
-    }
-
     AudioManager::~AudioManager()
     {
         Shutdown();
@@ -53,13 +41,13 @@ namespace ApplesGame
 
     void AudioManager::SetMusicVolume(float volume01)
     {
-        m_MusicVolume01 = Clamp01(volume01);
+        m_MusicVolume01 = Clamp(volume01, 0.0F, 1.0F);
         m_BackgroundMusic.setVolume(m_MusicVolume01 * k_MaxMusicVolume);
     }
 
     void AudioManager::SetSfxVolume(float volume01)
     {
-        m_SfxVolume01 = Clamp01(volume01);
+        m_SfxVolume01 = Clamp(volume01, 0.0F, 1.0F);
         m_EatAppleSound.setVolume(m_SfxVolume01 * k_MaxSfxVolume);
     }
 

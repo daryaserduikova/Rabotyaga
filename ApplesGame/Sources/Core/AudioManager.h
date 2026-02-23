@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿// @file AudioManager.h
+
+#pragma once
 #include <SFML/Audio.hpp>
 #include <string>
 

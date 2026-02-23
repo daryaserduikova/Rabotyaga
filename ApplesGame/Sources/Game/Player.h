@@ -1,8 +1,10 @@
+// @file Player.h
+
 #pragma once
 #include <SFML/Graphics.hpp>
 
 #include "Constants.h"
-#include "Math.h"
+#include "MathUtils.h"
 
 namespace ApplesGame
 {

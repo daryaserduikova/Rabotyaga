@@ -1,3 +1,5 @@
+// @file UI.h
+
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <cstdint>
@@ -24,6 +26,9 @@ namespace ApplesGame
         // Choose mode
         sf::Text chooseTitleText;
         sf::Text chooseListText;
+
+        // START text
+        sf::Text chooseStartText;
 
         // Game over
         sf::Text gameOverTitleText;

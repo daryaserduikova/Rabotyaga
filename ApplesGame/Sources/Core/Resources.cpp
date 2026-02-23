@@ -1,3 +1,5 @@
+// @file Resources.cpp
+
 #include "Resources.h"
 
 #include "Constants.h"
@@ -35,7 +37,9 @@ namespace ApplesGame
         ok = LoadTexture(m_AppleTexture, basePath + "Apple.png") && ok;
 
         ok = LoadTexture(m_BackgroundTexture, basePath + "Background.png") && ok;
+
         ok = LoadTexture(m_MenuBackgroundTexture, basePath + "MenuBackground.png") && ok;
+        ok = LoadTexture(m_ChooseMenuBackgroundTexture, basePath + "MenuChooseMode.png") && ok;
 
         ok = LoadTexture(m_SplashTexture, basePath + "Splash.png") && ok;
 

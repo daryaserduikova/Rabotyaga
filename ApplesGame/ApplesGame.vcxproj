@@ -18,6 +18,34 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sources\App\Main.cpp" />
+    <ClCompile Include="Sources\Core\AudioManager.cpp" />
+    <ClCompile Include="Sources\Core\Resources.cpp" />
+    <ClCompile Include="Sources\Game\Apple.cpp" />
+    <ClCompile Include="Sources\Game\Game.cpp" />
+    <ClCompile Include="Sources\Game\Player.cpp" />
+    <ClCompile Include="Sources\UI\UI.cpp" />
+    <ClCompile Include="Sources\Utils\Loggers.cpp" />
+    <ClCompile Include="Sources\Utils\MathUtils.cpp" />
+    <ClCompile Include="Sources\Utils\RenderHelpers.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Sources\Core\AudioManager.h" />
+    <ClInclude Include="Sources\Core\Constants.h" />
+    <ClInclude Include="Sources\Core\GameMode.h" />
+    <ClInclude Include="Sources\Core\Resources.h" />
+    <ClInclude Include="Sources\Game\Apple.h" />
+    <ClInclude Include="Sources\Game\Game.h" />
+    <ClInclude Include="Sources\Game\GameRules.h" />
+    <ClInclude Include="Sources\Game\Player.h" />
+    <ClInclude Include="Sources\UI\UI.h" />
+    <ClInclude Include="Sources\UI\UIModel.h" />
+    <ClInclude Include="Sources\Utils\Loggers.h" />
+    <ClInclude Include="Sources\Utils\MathUtils.h" />
+    <ClInclude Include="Sources\Utils\RenderHelpers.h" />
+    <ClInclude Include="Sources\Utils\Utils.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -123,7 +151,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\SFML\SFML-2.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\SFML\SFML-2.5.1\include;$(ProjectDir)Sources;$(ProjectDir)Sources\App;$(ProjectDir)Sources\Core;$(ProjectDir)Sources\Game;$(ProjectDir)Sources\UI;$(ProjectDir)Sources\Utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -143,7 +171,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\SFML\SFML-2.5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\SFML\SFML-2.5.1\include;$(ProjectDir)Sources;$(ProjectDir)Sources\App;$(ProjectDir)Sources\Core;$(ProjectDir)Sources\Game;$(ProjectDir)Sources\UI;$(ProjectDir)Sources\Utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -157,33 +185,6 @@
       </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Apple.cpp" />
-    <ClCompile Include="AudioManager.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Loggers.cpp" />
-    <ClCompile Include="Math.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="RenderHelpers.cpp" />
-    <ClCompile Include="Resources.cpp" />
-    <ClCompile Include="UI.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Apple.h" />
-    <ClInclude Include="AudioManager.h" />
-    <ClInclude Include="Constants.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="GameMode.h" />
-    <ClInclude Include="GameRules.h" />
-    <ClInclude Include="Loggers.h" />
-    <ClInclude Include="Math.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="RenderHelpers.h" />
-    <ClInclude Include="Resources.h" />
-    <ClInclude Include="UI.h" />
-    <ClInclude Include="UIModel.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

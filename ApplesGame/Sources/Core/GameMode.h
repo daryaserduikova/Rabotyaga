@@ -1,3 +1,5 @@
+// @file GameMode.h
+
 #pragma once
 
 namespace ApplesGame

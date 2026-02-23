@@ -1,5 +1,6 @@
+// @file Apple.cpp
+
 #include "Apple.h"
-#include <algorithm>
 
 namespace ApplesGame
 {
@@ -7,14 +8,16 @@ namespace ApplesGame
     {
         m_Position = GetRandomPositionInScreen(Screen::k_WidthF, Screen::k_HeightF);
 
-        m_Position.x = std::max(
+        m_Position.x = Clamp(
+            m_Position.x,
             AppleConfig::k_Radius,
-            std::min(m_Position.x, Screen::k_WidthF - AppleConfig::k_Radius)
+            Screen::k_WidthF - AppleConfig::k_Radius
         );
 
-        m_Position.y = std::max(
+        m_Position.y = Clamp(
+            m_Position.y,
             AppleConfig::k_Radius,
-            std::min(m_Position.y, Screen::k_HeightF - AppleConfig::k_Radius)
+            Screen::k_HeightF - AppleConfig::k_Radius
         );
 
         m_Sprite.setTexture(texture);

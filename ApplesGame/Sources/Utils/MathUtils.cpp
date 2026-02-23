@@ -1,11 +1,12 @@
-#include "Math.h"
+#include "MathUtils.h"
+#include <cmath>
 #include <cstdlib>
 
 namespace ApplesGame
 {
     Position2D GetRandomPositionInScreen(float screenWidth, float screenHeight)
     {
-        return 
+        return
         {
             (std::rand() / static_cast<float>(RAND_MAX)) * screenWidth,
             (std::rand() / static_cast<float>(RAND_MAX)) * screenHeight
@@ -29,13 +30,11 @@ namespace ApplesGame
     sf::Vector2f GetSpriteScale(const sf::Sprite& sprite, const Vector2D& desiredSize)
     {
         const sf::Texture* texture = sprite.getTexture();
-        if (texture == nullptr)
-        {
+        if (!texture)
             return { 1.0F, 1.0F };
-        }
 
         const sf::Vector2u textureSize = texture->getSize();
-        return 
+        return
         {
             desiredSize.x / static_cast<float>(textureSize.x),
             desiredSize.y / static_cast<float>(textureSize.y)
@@ -45,13 +44,11 @@ namespace ApplesGame
     sf::Vector2f GetSpriteOrigin(const sf::Sprite& sprite, const Vector2D& relativePosition)
     {
         const sf::Texture* texture = sprite.getTexture();
-        if (texture == nullptr)
-        {
+        if (!texture)
             return { 0.0F, 0.0F };
-        }
 
         const sf::Vector2u textureSize = texture->getSize();
-        return 
+        return
         {
             relativePosition.x * static_cast<float>(textureSize.x),
             relativePosition.y * static_cast<float>(textureSize.y)
@@ -61,10 +58,21 @@ namespace ApplesGame
     sf::Vector2f GetTextOrigin(const sf::Text& text, const Vector2D& relativePosition)
     {
         const sf::FloatRect bounds = text.getLocalBounds();
-        return 
+        return
         {
             (bounds.left + bounds.width) * relativePosition.x,
             (bounds.top + bounds.height) * relativePosition.y
         };
+    }
+
+    float Clamp(float value, float minValue, float maxValue)
+    {
+        if (value < minValue)
+            return minValue;
+
+        if (value > maxValue)
+            return maxValue;
+
+        return value;
     }
 }

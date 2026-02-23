@@ -1,97 +1,96 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Sources">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Sources\App">
-      <UniqueIdentifier>{005aeed0-dbf1-4846-9634-59ee9c08ca87}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\Core">
-      <UniqueIdentifier>{57bc86c2-df25-4197-a37f-7ce0e759315d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\Utils">
-      <UniqueIdentifier>{489c1c17-b139-4584-aa34-d178b6445f1d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\UI">
-      <UniqueIdentifier>{1557b0b7-7b05-4748-828b-5f01da1e14aa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Sources\Game">
-      <UniqueIdentifier>{ec439a50-67f3-4416-b94b-6a72ab6e7d17}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>Sources\App</Filter>
+    <ClCompile Include="Sources\App\Main.cpp">
+      <Filter>App</Filter>
     </ClCompile>
-    <ClCompile Include="Apple.cpp">
-      <Filter>Sources\Game</Filter>
+    <ClCompile Include="Sources\Core\AudioManager.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Sources\Game</Filter>
+    <ClCompile Include="Sources\Core\Resources.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Sources\Game</Filter>
+    <ClCompile Include="Sources\Game\Apple.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Resources.cpp">
-      <Filter>Sources\Core</Filter>
+    <ClCompile Include="Sources\Game\Game.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="AudioManager.cpp">
-      <Filter>Sources\Core</Filter>
+    <ClCompile Include="Sources\Game\Player.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="UI.cpp">
-      <Filter>Sources\UI</Filter>
+    <ClCompile Include="Sources\UI\UI.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="Loggers.cpp">
-      <Filter>Sources\Utils</Filter>
+    <ClCompile Include="Sources\Utils\Loggers.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Math.cpp">
-      <Filter>Sources\Utils</Filter>
+    <ClCompile Include="Sources\Utils\MathUtils.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="RenderHelpers.cpp">
-      <Filter>Sources\Utils</Filter>
+    <ClCompile Include="Sources\Utils\RenderHelpers.cpp">
+      <Filter>Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Apple.h">
-      <Filter>Sources\Game</Filter>
+    <ClInclude Include="Sources\Core\AudioManager.h">
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Sources\Game</Filter>
+    <ClInclude Include="Sources\Core\Constants.h">
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>Sources\Game</Filter>
+    <ClInclude Include="Sources\Core\GameMode.h">
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Constants.h">
-      <Filter>Sources\Core</Filter>
+    <ClInclude Include="Sources\Core\Resources.h">
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="GameMode.h">
-      <Filter>Sources\Core</Filter>
+    <ClInclude Include="Sources\Game\Apple.h">
+      <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Resources.h">
-      <Filter>Sources\Core</Filter>
+    <ClInclude Include="Sources\Game\Game.h">
+      <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="AudioManager.h">
-      <Filter>Sources\Core</Filter>
+    <ClInclude Include="Sources\Game\GameRules.h">
+      <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="UIModel.h">
-      <Filter>Sources\UI</Filter>
+    <ClInclude Include="Sources\Game\Player.h">
+      <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>Sources\UI</Filter>
+    <ClInclude Include="Sources\UI\UI.h">
+      <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Loggers.h">
-      <Filter>Sources\Utils</Filter>
+    <ClInclude Include="Sources\UI\UIModel.h">
+      <Filter>UI</Filter>
     </ClInclude>
-    <ClInclude Include="Math.h">
-      <Filter>Sources\Utils</Filter>
+    <ClInclude Include="Sources\Utils\Loggers.h">
+      <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="RenderHelpers.h">
-      <Filter>Sources\Utils</Filter>
+    <ClInclude Include="Sources\Utils\MathUtils.h">
+      <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="GameRules.h">
-      <Filter>Sources\Game</Filter>
+    <ClInclude Include="Sources\Utils\RenderHelpers.h">
+      <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Utils\Utils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{c97b6b33-67bf-45ef-86c5-e24eff5bc0e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{a75dd9fd-244f-4023-93a8-818f431cec08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="App">
+      <UniqueIdentifier>{4a674a12-e634-449b-96e9-6ec94d6e3b94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{a6aa0020-ad83-4e7f-8bb9-4923f8019d86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{238e458a-8cff-479c-b165-ee88879138a4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

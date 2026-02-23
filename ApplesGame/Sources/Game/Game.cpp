@@ -1,26 +1,55 @@
-﻿#include "Game.h"
+﻿// @file Game.cpp
+
+#include "Game.h"
 
 #include <algorithm>
 
 #include "Constants.h"
-#include "Math.h"
+#include "MathUtils.h"
 #include "RenderHelpers.h"
 
 namespace ApplesGame
 {
     static float Clamp01(float value)
     {
-        if (value < 0.0F)
-        {
-            return 0.0F;
-        }
-
-        if (value > 1.0F)
-        {
-            return 1.0F;
-        }
-
+        if (value < 0.0F) return 0.0F;
+        if (value > 1.0F) return 1.0F;
         return value;
+    }
+
+    static bool IsUpKey(sf::Keyboard::Key key)
+    {
+        return (key == sf::Keyboard::Up) || (key == sf::Keyboard::W);
+    }
+
+    static bool IsDownKey(sf::Keyboard::Key key)
+    {
+        return (key == sf::Keyboard::Down) || (key == sf::Keyboard::S);
+    }
+
+    static bool IsConfirmKey(sf::Keyboard::Key key)
+    {
+        return (key == sf::Keyboard::Enter) || (key == sf::Keyboard::Space);
+    }
+
+    // Cyclic index in [0..count-1]
+    static int MoveMenuIndex(int index, int count, bool up, bool down)
+    {
+        if (count <= 0)
+        {
+            return 0;
+        }
+
+        if (up)
+        {
+            index = (index - 1 + count) % count;
+        }
+        else if (down)
+        {
+            index = (index + 1) % count;
+        }
+
+        return index;
     }
 
     bool Game::Init()
@@ -40,9 +69,14 @@ namespace ApplesGame
         m_BackgroundSprite.setTexture(m_Resources.BackgroundTexture());
         FitSpriteToScreen(m_BackgroundSprite);
 
-        m_MenuBackgroundSprite.setTexture(m_Resources.MenuBackgroundTexture());
-        FitSpriteToScreen(m_MenuBackgroundSprite);
+        // Menu sprites
+        m_MenuSprites.main.setTexture(m_Resources.MenuBackgroundTexture());
+        FitSpriteToScreen(m_MenuSprites.main);
 
+        m_MenuSprites.choose.setTexture(m_Resources.ChooseMenuBackgroundTexture());
+        FitSpriteToScreen(m_MenuSprites.choose);
+
+        // Splash
         m_SplashSprite.setTexture(m_Resources.SplashTexture());
         FitSpriteToScreen(m_SplashSprite);
 
@@ -116,7 +150,12 @@ namespace ApplesGame
         }
     }
 
-    int Game::GetAppleTargetCountFromRules() const
+    bool Game::IsInfiniteApplesMode() const
+    {
+        return HasRule(m_Rules, EGameRule::InfiniteApples);
+    }
+
+    int Game::GetInitialAppleCountFromRules() const
     {
         if (HasRule(m_Rules, EGameRule::Finite20))
         {
@@ -128,6 +167,7 @@ namespace ApplesGame
             return 50;
         }
 
+        // Infinite: стартовое число, яблоки не заканчиваются (respawn)
         return 10;
     }
 
@@ -135,46 +175,20 @@ namespace ApplesGame
     {
         m_Player.Reset(m_Resources.PlayerTexture());
         m_Score = 0;
-        AllocateApples(GetAppleTargetCountFromRules());
+        AllocateApples(GetInitialAppleCountFromRules());
     }
 
     void Game::ApplyChooseSelection()
     {
         switch (m_ChooseIndex)
         {
-        case 0:
-        {
-            SetAppleMode(m_Rules, EGameRule::Finite20);
-            break;
-        }
-        case 1:
-        {
-            SetAppleMode(m_Rules, EGameRule::Finite50);
-            break;
-        }
-        case 2:
-        {
-            SetAppleMode(m_Rules, EGameRule::InfiniteApples);
-            break;
-        }
-        case 3:
-        {
-            SetSpeedMode(m_Rules, EGameRule::SpeedUpOnEat);
-            break;
-        }
-        case 4:
-        {
-            SetSpeedMode(m_Rules, EGameRule::NoSpeedUpOnEat);
-            break;
-        }
-        case 5:
-        {
-            break;
-        }
-        default:
-        {
-            break;
-        }
+        case 0: SetAppleMode(m_Rules, EGameRule::Finite20); break;
+        case 1: SetAppleMode(m_Rules, EGameRule::Finite50); break;
+        case 2: SetAppleMode(m_Rules, EGameRule::InfiniteApples); break;
+        case 3: SetSpeedMode(m_Rules, EGameRule::SpeedUpOnEat); break;
+        case 4: SetSpeedMode(m_Rules, EGameRule::NoSpeedUpOnEat); break;
+        case 5: break;
+        default: break;
         }
     }
 
@@ -199,26 +213,23 @@ namespace ApplesGame
             m_Player.AddSpeed(PlayerConfig::k_Acceleration);
         }
 
-        const bool infiniteApples = HasRule(m_Rules, EGameRule::InfiniteApples);
-
-        if (infiniteApples)
+        if (IsInfiniteApplesMode())
         {
             m_Apples[appleIndex].Respawn(m_Resources.AppleTexture());
+            return;
         }
-        else
+
+        for (int i = appleIndex; i < m_ApplesCount - 1; ++i)
         {
-            for (int i = appleIndex; i < m_ApplesCount - 1; ++i)
-            {
-                m_Apples[i] = m_Apples[i + 1];
-            }
+            m_Apples[i] = m_Apples[i + 1];
+        }
 
-            m_ApplesCount--;
+        m_ApplesCount--;
 
-            if (m_ApplesCount <= 0)
-            {
-                m_Mode = EGameMode::GameOver;
-                m_GameOverIndex = 0;
-            }
+        if (m_ApplesCount <= 0)
+        {
+            m_Mode = EGameMode::GameOver;
+            m_GameOverIndex = 0;
         }
     }
 
@@ -247,7 +258,7 @@ namespace ApplesGame
                     return;
                 }
 
-                if (!HasRule(m_Rules, EGameRule::InfiniteApples))
+                if (!IsInfiniteApplesMode())
                 {
                     --i;
                 }
@@ -262,7 +273,7 @@ namespace ApplesGame
             return;
         }
 
-        const auto key = event.key.code;
+        const sf::Keyboard::Key key = event.key.code;
 
         if (m_Mode == EGameMode::Splash)
         {
@@ -272,7 +283,7 @@ namespace ApplesGame
                 return;
             }
 
-            if (key == sf::Keyboard::Space || key == sf::Keyboard::Enter)
+            if (IsConfirmKey(key))
             {
                 m_Mode = EGameMode::MainMenu;
                 m_MainMenuIndex = 0;
@@ -290,17 +301,17 @@ namespace ApplesGame
                 return;
             }
 
-            const bool up = (key == sf::Keyboard::Up) || (key == sf::Keyboard::W);
-            const bool down = (key == sf::Keyboard::Down) || (key == sf::Keyboard::S);
+            const bool up = IsUpKey(key);
+            const bool down = IsDownKey(key);
 
-            if (up || down)
+            const int oldIndex = m_MainMenuIndex;
+            m_MainMenuIndex = MoveMenuIndex(m_MainMenuIndex, 2, up, down);
+            if (m_MainMenuIndex != oldIndex)
             {
-                m_MainMenuIndex = 1 - m_MainMenuIndex;
                 return;
             }
 
-            const bool confirm = (key == sf::Keyboard::Enter) || (key == sf::Keyboard::Space);
-            if (confirm)
+            if (IsConfirmKey(key))
             {
                 if (m_MainMenuIndex == 0)
                 {
@@ -327,61 +338,27 @@ namespace ApplesGame
                 return;
             }
 
-            const bool up = (key == sf::Keyboard::Up) || (key == sf::Keyboard::W);
-            const bool down = (key == sf::Keyboard::Down) || (key == sf::Keyboard::S);
+            const bool up = IsUpKey(key);
+            const bool down = IsDownKey(key);
 
-            if (up)
+            const int oldIndex = m_ChooseIndex;
+            m_ChooseIndex = MoveMenuIndex(m_ChooseIndex, 6, up, down);
+            if (m_ChooseIndex != oldIndex)
             {
-                m_ChooseIndex = (m_ChooseIndex + 5) % 6;
-                return;
-            }
-
-            if (down)
-            {
-                m_ChooseIndex = (m_ChooseIndex + 1) % 6;
                 return;
             }
 
             switch (key)
             {
-            case sf::Keyboard::Num1:
-            {
-                m_ChooseIndex = 0;
-                ApplyChooseSelection();
-                return;
-            }
-            case sf::Keyboard::Num2:
-            {
-                m_ChooseIndex = 1;
-                ApplyChooseSelection();
-                return;
-            }
-            case sf::Keyboard::Num3:
-            {
-                m_ChooseIndex = 2;
-                ApplyChooseSelection();
-                return;
-            }
-            case sf::Keyboard::Num4:
-            {
-                m_ChooseIndex = 3;
-                ApplyChooseSelection();
-                return;
-            }
-            case sf::Keyboard::Num5:
-            {
-                m_ChooseIndex = 4;
-                ApplyChooseSelection();
-                return;
-            }
-            default:
-            {
-                break;
-            }
+            case sf::Keyboard::Num1: m_ChooseIndex = 0; ApplyChooseSelection(); return;
+            case sf::Keyboard::Num2: m_ChooseIndex = 1; ApplyChooseSelection(); return;
+            case sf::Keyboard::Num3: m_ChooseIndex = 2; ApplyChooseSelection(); return;
+            case sf::Keyboard::Num4: m_ChooseIndex = 3; ApplyChooseSelection(); return;
+            case sf::Keyboard::Num5: m_ChooseIndex = 4; ApplyChooseSelection(); return;
+            default: break;
             }
 
-            const bool confirm = (key == sf::Keyboard::Enter) || (key == sf::Keyboard::Space);
-            if (confirm)
+            if (IsConfirmKey(key))
             {
                 if (m_ChooseIndex == 5)
                 {
@@ -407,17 +384,17 @@ namespace ApplesGame
                 return;
             }
 
-            const bool up = (key == sf::Keyboard::Up) || (key == sf::Keyboard::W);
-            const bool down = (key == sf::Keyboard::Down) || (key == sf::Keyboard::S);
+            const bool up = IsUpKey(key);
+            const bool down = IsDownKey(key);
 
-            if (up || down)
+            const int oldIndex = m_GameOverIndex;
+            m_GameOverIndex = MoveMenuIndex(m_GameOverIndex, 2, up, down);
+            if (m_GameOverIndex != oldIndex)
             {
-                m_GameOverIndex = 1 - m_GameOverIndex;
                 return;
             }
 
-            const bool confirm = (key == sf::Keyboard::Enter) || (key == sf::Keyboard::Space);
-            if (confirm)
+            if (IsConfirmKey(key))
             {
                 if (m_GameOverIndex == 0)
                 {
@@ -464,24 +441,22 @@ namespace ApplesGame
     {
         if (m_Mode == EGameMode::Splash)
         {
-            constexpr float k_FadeSeconds = 1.0F;
-            const float t01 = Clamp01(m_SplashTimerSeconds / k_FadeSeconds);
+            const float t01 = Clamp01(m_SplashTimerSeconds / UIConfig::k_SplashFadeSeconds);
             const std::uint8_t alpha = static_cast<std::uint8_t>(t01 * 255.0F);
 
-            // ВАЖНО: добавили m_SplashTimerSeconds для мигания
             DrawSplash(m_Ui, window, m_SplashSprite, alpha, m_SplashTimerSeconds);
             return;
         }
 
         if (m_Mode == EGameMode::MainMenu)
         {
-            DrawMainMenu(m_Ui, window, m_MenuBackgroundSprite);
+            DrawMainMenu(m_Ui, window, m_MenuSprites.main);
             return;
         }
 
         if (m_Mode == EGameMode::ChooseMode)
         {
-            DrawChooseMode(m_Ui, window, m_MenuBackgroundSprite);
+            DrawChooseMode(m_Ui, window, m_MenuSprites.choose);
             return;
         }
 

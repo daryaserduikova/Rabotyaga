@@ -1,3 +1,5 @@
+// @file Game.h
+
 #pragma once
 #include <SFML/Graphics.hpp>
 
@@ -11,6 +13,12 @@
 
 namespace ApplesGame
 {
+    struct MenuSprites
+    {
+        sf::Sprite main;
+        sf::Sprite choose;
+    };
+
     class Game
     {
     public:
@@ -37,7 +45,9 @@ namespace ApplesGame
 
         void OnAppleEaten(int appleIndex);
 
-        int GetAppleTargetCountFromRules() const;
+        bool IsInfiniteApplesMode() const;
+        int GetInitialAppleCountFromRules() const;
+
         void EnsureDefaultRules();
 
         void ApplyChooseSelection();
@@ -66,7 +76,7 @@ namespace ApplesGame
         AudioManager m_Audio;
 
         sf::Sprite m_BackgroundSprite;
-        sf::Sprite m_MenuBackgroundSprite;
+        MenuSprites m_MenuSprites;
         sf::Sprite m_SplashSprite;
     };
 }
