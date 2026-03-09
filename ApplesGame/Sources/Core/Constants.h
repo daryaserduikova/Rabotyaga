@@ -39,7 +39,7 @@ namespace ApplesGame
     namespace UIConfig
     {
         // Splash
-        constexpr float k_SplashFadeSeconds = 1.0F;
+        constexpr float k_SplashFadeSeconds = 1.0F; //splash fade
         constexpr float k_SplashBlinkHz = 0.6F; // blink
         constexpr float k_TwoPi = 6.28318530718F;
 
