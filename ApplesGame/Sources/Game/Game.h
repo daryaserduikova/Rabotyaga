@@ -2,6 +2,7 @@
 
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <string>
 
 #include "AudioManager.h"
 #include "Apple.h"
@@ -19,17 +20,22 @@ namespace ApplesGame
         sf::Sprite choose;
     };
 
+    struct LeaderboardEntry
+    {
+        std::string name;
+        int score = 0;
+        bool isPlayer = false;
+    };
+
     class Game
     {
     public:
         bool Init();
+        void Shutdown();
 
         void HandleEvent(const sf::Event& event);
-
         void Update(float dtSeconds);
         void Draw(sf::RenderWindow& window);
-
-        void Shutdown();
 
         bool ShouldExit() const
         {
@@ -37,46 +43,63 @@ namespace ApplesGame
         }
 
     private:
+        // Core
         void ResetGameplay();
         void UpdatePlaying(float dtSeconds);
+        void EnterGameOver();
 
+        // Apples
         void AllocateApples(int count);
         void FreeApples();
+        void OnAppleEaten(int index);
 
-        void OnAppleEaten(int appleIndex);
-
-        bool IsInfiniteApplesMode() const;
-        int GetInitialAppleCountFromRules() const;
-
+        // Rules
         void EnsureDefaultRules();
-
+        int GetInitialAppleCountFromRules() const;
+        bool IsInfiniteMode() const;
         void ApplyChooseSelection();
-        void StartFromChooseMode();
+
+        // Leaderboard
+        void GenerateLeaderboard();
+        void UpdatePlayerLeaderboard();
+        void SortLeaderboardDescending();
+
+        // Input
+        void HandleMainMenuInput(sf::Keyboard::Key key);
+        void HandleChooseModeInput(sf::Keyboard::Key key);
+        void HandleGameOverInput(sf::Keyboard::Key key);
+        void HandleLeaderboardInput(sf::Keyboard::Key key);
 
     private:
-        EGameMode m_Mode = EGameMode::Splash;
+        static const int k_MainMenuCount = 2;
+        static const int k_ChooseMenuCount = 6;
+        static const int k_GameOverCount = 3;
+        static const int k_ChooseStartIndex = 5;
+        static const int k_LeaderboardCount = 7;
+
+    private:
+        EGameMode m_Mode = EGameMode::MainMenu;
         bool m_RequestExit = false;
 
         int m_MainMenuIndex = 0;
-        int m_ChooseIndex = 5;
+        int m_ChooseIndex = k_ChooseStartIndex;
         int m_GameOverIndex = 0;
 
-        float m_SplashTimerSeconds = 0.0F;
-
         EGameRule m_Rules = EGameRule::None;
-
         int m_Score = 0;
+
         Player m_Player;
 
         Apple* m_Apples = nullptr;
         int m_ApplesCount = 0;
 
-        Resources m_Resources;
-        UIState m_Ui;
-        AudioManager m_Audio;
+        LeaderboardEntry m_Leaderboard[k_LeaderboardCount];
 
-        sf::Sprite m_BackgroundSprite;
+        Resources m_Resources;
+        AudioManager m_Audio;
+        UIState m_Ui;
+
+        sf::Sprite m_Background;
         MenuSprites m_MenuSprites;
-        sf::Sprite m_SplashSprite;
     };
 }

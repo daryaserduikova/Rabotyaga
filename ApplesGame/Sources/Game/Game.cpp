@@ -2,7 +2,7 @@
 
 #include "Game.h"
 
-#include <algorithm>
+#include <cstdlib>
 
 #include "Constants.h"
 #include "MathUtils.h"
@@ -10,54 +10,83 @@
 
 namespace ApplesGame
 {
-    static float Clamp01(float value)
+    namespace
     {
-        if (value < 0.0F) return 0.0F;
-        if (value > 1.0F) return 1.0F;
-        return value;
+        constexpr const char* k_PlayerName = "Player";
+
+        constexpr const char* k_LeaderboardNames[] =
+        {
+            "Rodion",
+            "Tikhon",
+            "Missha",
+            "Eva",
+            "Sergey",
+            "Alla",
+            k_PlayerName
+        };
+
+        bool IsUpKey(sf::Keyboard::Key key)
+        {
+            return key == sf::Keyboard::Up || key == sf::Keyboard::W;
+        }
+
+        bool IsDownKey(sf::Keyboard::Key key)
+        {
+            return key == sf::Keyboard::Down || key == sf::Keyboard::S;
+        }
+
+        bool IsConfirmKey(sf::Keyboard::Key key)
+        {
+            return key == sf::Keyboard::Enter || key == sf::Keyboard::Space;
+        }
+
+        bool IsBackKey(sf::Keyboard::Key key)
+        {
+            return IsConfirmKey(key) || key == sf::Keyboard::Escape;
+        }
+
+        int MoveMenuIndex(int index, int count, bool up, bool down)
+        {
+            if (count <= 0)
+            {
+                return 0;
+            }
+
+            if (up)
+            {
+                return (index - 1 + count) % count;
+            }
+
+            if (down)
+            {
+                return (index + 1) % count;
+            }
+
+            return index;
+        }
+
+        bool ShouldSwapLeaderboardEntries(
+            const LeaderboardEntry& left,
+            const LeaderboardEntry& right)
+        {
+            return left.score < right.score;
+        }
     }
-
-    static bool IsUpKey(sf::Keyboard::Key key)
-    {
-        return key == sf::Keyboard::Up || key == sf::Keyboard::W;
-    }
-
-    static bool IsDownKey(sf::Keyboard::Key key)
-    {
-        return key == sf::Keyboard::Down || key == sf::Keyboard::S;
-    }
-
-    static bool IsConfirmKey(sf::Keyboard::Key key)
-    {
-        return key == sf::Keyboard::Enter || key == sf::Keyboard::Space;
-    }
-
-    static int MoveMenuIndex(int index, int count, bool up, bool down)
-    {
-        if (count <= 0) return 0;
-
-        if (up)
-            index = (index - 1 + count) % count;
-        else if (down)
-            index = (index + 1) % count;
-
-        return index;
-    }
-
-    // Init / Shutdown
 
     bool Game::Init()
     {
         if (!m_Resources.Load(Paths::k_Resources))
+        {
             return false;
+        }
 
         if (!m_Audio.Init(Paths::k_Resources))
+        {
             return false;
+        }
 
-        m_Audio.PlayMusic();
-
-        m_BackgroundSprite.setTexture(m_Resources.BackgroundTexture());
-        FitSpriteToScreen(m_BackgroundSprite);
+        m_Background.setTexture(m_Resources.BackgroundTexture());
+        FitSpriteToScreen(m_Background);
 
         m_MenuSprites.main.setTexture(m_Resources.MenuBackgroundTexture());
         FitSpriteToScreen(m_MenuSprites.main);
@@ -65,18 +94,17 @@ namespace ApplesGame
         m_MenuSprites.choose.setTexture(m_Resources.ChooseMenuBackgroundTexture());
         FitSpriteToScreen(m_MenuSprites.choose);
 
-        m_SplashSprite.setTexture(m_Resources.SplashTexture());
-        FitSpriteToScreen(m_SplashSprite);
-
         InitUI(m_Ui, m_Resources.UiFont(), m_Resources.TitleFont());
 
         EnsureDefaultRules();
+        GenerateLeaderboard();
 
-        m_Mode = EGameMode::Splash;
-        m_SplashTimerSeconds = 0.0F;
+        m_Mode = EGameMode::MainMenu;
+        m_RequestExit = false;
         m_MainMenuIndex = 0;
-        m_ChooseIndex = 5;
+        m_ChooseIndex = k_ChooseStartIndex;
         m_GameOverIndex = 0;
+        m_Score = 0;
 
         return true;
     }
@@ -87,15 +115,80 @@ namespace ApplesGame
         m_Audio.Shutdown();
     }
 
-    // Apples
+    void Game::ResetGameplay()
+    {
+        m_Player.Reset(m_Resources.PlayerTexture());
+        m_Score = 0;
+        AllocateApples(GetInitialAppleCountFromRules());
+    }
+
+    void Game::Update(float dtSeconds)
+    {
+        if (m_Mode == EGameMode::Playing)
+        {
+            UpdatePlaying(dtSeconds);
+        }
+
+        UIModel model{};
+        model.mode = m_Mode;
+        model.score = m_Score;
+        model.mainMenuIndex = m_MainMenuIndex;
+        model.chooseIndex = m_ChooseIndex;
+        model.gameOverIndex = m_GameOverIndex;
+        model.rules = m_Rules;
+        model.leaderboardCount = k_LeaderboardCount;
+
+        for (int i = 0; i < k_LeaderboardCount; ++i)
+        {
+            model.leaderboardNames[i] = m_Leaderboard[i].name;
+            model.leaderboardScores[i] = m_Leaderboard[i].score;
+        }
+
+        UpdateUI(m_Ui, model);
+    }
+
+    void Game::Draw(sf::RenderWindow& window)
+    {
+        switch (m_Mode)
+        {
+        case EGameMode::MainMenu:
+            DrawMainMenu(m_Ui, window, m_MenuSprites.main);
+            return;
+
+        case EGameMode::ChooseMode:
+            DrawChooseMode(m_Ui, window, m_MenuSprites.choose);
+            return;
+
+        case EGameMode::Leaderboard:
+            DrawLeaderboard(m_Ui, window, m_Background);
+            return;
+
+        case EGameMode::Playing:
+        case EGameMode::GameOver:
+            break;
+        }
+
+        window.draw(m_Background);
+
+        m_Player.Draw(window);
+
+        for (int i = 0; i < m_ApplesCount; ++i)
+        {
+            m_Apples[i].Draw(window);
+        }
+
+        DrawHud(m_Ui, window);
+
+        if (m_Mode == EGameMode::GameOver)
+        {
+            DrawGameOver(m_Ui, window);
+        }
+    }
 
     void Game::FreeApples()
     {
-        if (m_Apples)
-        {
-            delete[] m_Apples;
-            m_Apples = nullptr;
-        }
+        delete[] m_Apples;
+        m_Apples = nullptr;
         m_ApplesCount = 0;
     }
 
@@ -104,16 +197,48 @@ namespace ApplesGame
         FreeApples();
 
         if (count <= 0)
+        {
             return;
+        }
 
         m_Apples = new Apple[count];
         m_ApplesCount = count;
 
         for (int i = 0; i < m_ApplesCount; ++i)
+        {
             m_Apples[i].Respawn(m_Resources.AppleTexture());
+        }
     }
 
-    // Rules
+    void Game::OnAppleEaten(int index)
+    {
+        ++m_Score;
+        m_Audio.PlayEatApple();
+
+        if (HasRule(m_Rules, EGameRule::SpeedUpOnEat) &&
+            !HasRule(m_Rules, EGameRule::NoSpeedUpOnEat))
+        {
+            m_Player.AddSpeed(PlayerConfig::k_Acceleration);
+        }
+
+        if (IsInfiniteMode())
+        {
+            m_Apples[index].Respawn(m_Resources.AppleTexture());
+            return;
+        }
+
+        for (int i = index; i < m_ApplesCount - 1; ++i)
+        {
+            m_Apples[i] = m_Apples[i + 1];
+        }
+
+        --m_ApplesCount;
+
+        if (m_ApplesCount <= 0)
+        {
+            EnterGameOver();
+        }
+    }
 
     void Game::EnsureDefaultRules()
     {
@@ -123,84 +248,113 @@ namespace ApplesGame
             HasRule(m_Rules, EGameRule::InfiniteApples);
 
         if (!hasAppleMode)
-            SetAppleMode(m_Rules, EGameRule::InfiniteApples);
+        {
+            m_Rules |= EGameRule::InfiniteApples;
+        }
 
         const bool hasSpeedMode =
             HasRule(m_Rules, EGameRule::SpeedUpOnEat) ||
             HasRule(m_Rules, EGameRule::NoSpeedUpOnEat);
 
         if (!hasSpeedMode)
-            SetSpeedMode(m_Rules, EGameRule::SpeedUpOnEat);
-    }
-
-    bool Game::IsInfiniteApplesMode() const
-    {
-        return HasRule(m_Rules, EGameRule::InfiniteApples);
+        {
+            m_Rules |= EGameRule::SpeedUpOnEat;
+        }
     }
 
     int Game::GetInitialAppleCountFromRules() const
     {
-        if (HasRule(m_Rules, EGameRule::Finite20)) return 20;
-        if (HasRule(m_Rules, EGameRule::Finite50)) return 50;
+        if (HasRule(m_Rules, EGameRule::Finite20))
+        {
+            return 20;
+        }
+
+        if (HasRule(m_Rules, EGameRule::Finite50))
+        {
+            return 50;
+        }
+
         return 10;
     }
 
-    // Gameplay
-
-    void Game::ResetGameplay()
+    bool Game::IsInfiniteMode() const
     {
-        m_Player.Reset(m_Resources.PlayerTexture());
-        m_Score = 0;
-        AllocateApples(GetInitialAppleCountFromRules());
+        return HasRule(m_Rules, EGameRule::InfiniteApples);
     }
 
     void Game::ApplyChooseSelection()
     {
         switch (m_ChooseIndex)
         {
-        case 0: SetAppleMode(m_Rules, EGameRule::Finite20); break;
-        case 1: SetAppleMode(m_Rules, EGameRule::Finite50); break;
-        case 2: SetAppleMode(m_Rules, EGameRule::InfiniteApples); break;
-        case 3: SetSpeedMode(m_Rules, EGameRule::SpeedUpOnEat); break;
-        case 4: SetSpeedMode(m_Rules, EGameRule::NoSpeedUpOnEat); break;
-        default: break;
+        case 0:
+            SetAppleMode(m_Rules, EGameRule::Finite20);
+            break;
+
+        case 1:
+            SetAppleMode(m_Rules, EGameRule::Finite50);
+            break;
+
+        case 2:
+            SetAppleMode(m_Rules, EGameRule::InfiniteApples);
+            break;
+
+        case 3:
+            SetSpeedMode(m_Rules, EGameRule::SpeedUpOnEat);
+            break;
+
+        case 4:
+            SetSpeedMode(m_Rules, EGameRule::NoSpeedUpOnEat);
+            break;
+
+        default:
+            break;
         }
     }
 
-    void Game::StartFromChooseMode()
+    void Game::GenerateLeaderboard()
     {
-        EnsureDefaultRules();
-        ResetGameplay();
-        m_Mode = EGameMode::Playing;
-    }
-
-    void Game::OnAppleEaten(int appleIndex)
-    {
-        m_Score++;
-        m_Audio.PlayEatApple();
-
-        const bool shouldSpeedUp =
-            HasRule(m_Rules, EGameRule::SpeedUpOnEat) &&
-            !HasRule(m_Rules, EGameRule::NoSpeedUpOnEat);
-
-        if (shouldSpeedUp)
-            m_Player.AddSpeed(PlayerConfig::k_Acceleration);
-
-        if (IsInfiniteApplesMode())
+        for (int i = 0; i < k_LeaderboardCount; ++i)
         {
-            m_Apples[appleIndex].Respawn(m_Resources.AppleTexture());
-            return;
+            LeaderboardEntry& entry = m_Leaderboard[i];
+            entry.name = k_LeaderboardNames[i];
+            entry.isPlayer = (entry.name == k_PlayerName);
+            entry.score = entry.isPlayer ? 0 : 30 + (std::rand() % 121);
         }
 
-        for (int i = appleIndex; i < m_ApplesCount - 1; ++i)
-            m_Apples[i] = m_Apples[i + 1];
+        SortLeaderboardDescending();
+    }
 
-        m_ApplesCount--;
-
-        if (m_ApplesCount <= 0)
+    void Game::UpdatePlayerLeaderboard()
+    {
+        for (int i = 0; i < k_LeaderboardCount; ++i)
         {
-            m_Mode = EGameMode::GameOver;
-            m_GameOverIndex = 0;
+            if (!m_Leaderboard[i].isPlayer)
+            {
+                continue;
+            }
+
+            m_Leaderboard[i].score = m_Score;
+            break;
+        }
+
+        SortLeaderboardDescending();
+    }
+
+    void Game::SortLeaderboardDescending()
+    {
+        for (int i = 0; i < k_LeaderboardCount - 1; ++i)
+        {
+            for (int j = 0; j < k_LeaderboardCount - 1 - i; ++j)
+            {
+                if (!ShouldSwapLeaderboardEntries(m_Leaderboard[j], m_Leaderboard[j + 1]))
+                {
+                    continue;
+                }
+
+                const LeaderboardEntry temp = m_Leaderboard[j];
+                m_Leaderboard[j] = m_Leaderboard[j + 1];
+                m_Leaderboard[j + 1] = temp;
+            }
         }
     }
 
@@ -211,223 +365,148 @@ namespace ApplesGame
 
         if (m_Player.HasCollisionWithScreenBorder())
         {
-            m_Mode = EGameMode::GameOver;
-            m_GameOverIndex = 0;
+            EnterGameOver();
             return;
         }
 
         for (int i = 0; i < m_ApplesCount; ++i)
         {
-            if (IsCirclesCollide(
+            if (!IsCirclesCollide(
                 m_Player.Position(), m_Player.Radius(),
                 m_Apples[i].Position(), m_Apples[i].Radius()))
             {
-                OnAppleEaten(i);
+                continue;
+            }
 
-                if (m_Mode != EGameMode::Playing)
-                    return;
+            OnAppleEaten(i);
 
-                if (!IsInfiniteApplesMode())
-                    --i;
+            if (!IsInfiniteMode())
+            {
+                --i;
             }
         }
     }
 
-    // HandleEvent
+    void Game::EnterGameOver()
+    {
+        UpdatePlayerLeaderboard();
+        m_GameOverIndex = 0;
+        m_Mode = EGameMode::GameOver;
+    }
+
+    void Game::HandleMainMenuInput(sf::Keyboard::Key key)
+    {
+        m_MainMenuIndex = MoveMenuIndex(
+            m_MainMenuIndex,
+            k_MainMenuCount,
+            IsUpKey(key),
+            IsDownKey(key));
+
+        if (!IsConfirmKey(key))
+        {
+            return;
+        }
+
+        if (m_MainMenuIndex == 0)
+        {
+            m_Mode = EGameMode::ChooseMode;
+            m_ChooseIndex = k_ChooseStartIndex;
+            return;
+        }
+
+        m_RequestExit = true;
+    }
+
+    void Game::HandleChooseModeInput(sf::Keyboard::Key key)
+    {
+        m_ChooseIndex = MoveMenuIndex(
+            m_ChooseIndex,
+            k_ChooseMenuCount,
+            IsUpKey(key),
+            IsDownKey(key));
+
+        if (!IsConfirmKey(key))
+        {
+            return;
+        }
+
+        if (m_ChooseIndex == k_ChooseStartIndex)
+        {
+            ResetGameplay();
+            m_Mode = EGameMode::Playing;
+            return;
+        }
+
+        ApplyChooseSelection();
+    }
+
+    void Game::HandleGameOverInput(sf::Keyboard::Key key)
+    {
+        m_GameOverIndex = MoveMenuIndex(
+            m_GameOverIndex,
+            k_GameOverCount,
+            IsUpKey(key),
+            IsDownKey(key));
+
+        if (!IsConfirmKey(key))
+        {
+            return;
+        }
+
+        switch (m_GameOverIndex)
+        {
+        case 0:
+            ResetGameplay();
+            m_Mode = EGameMode::Playing;
+            break;
+
+        case 1:
+            m_Mode = EGameMode::Leaderboard;
+            break;
+
+        default:
+            m_Mode = EGameMode::MainMenu;
+            break;
+        }
+    }
+
+    void Game::HandleLeaderboardInput(sf::Keyboard::Key key)
+    {
+        if (IsBackKey(key))
+        {
+            m_Mode = EGameMode::GameOver;
+        }
+    }
 
     void Game::HandleEvent(const sf::Event& event)
     {
         if (event.type != sf::Event::KeyPressed)
+        {
             return;
+        }
 
-        const auto key = event.key.code;
+        const sf::Keyboard::Key key = event.key.code;
 
         switch (m_Mode)
         {
-        case EGameMode::Splash:
-        {
-            if (key == sf::Keyboard::Escape)
-            {
-                m_RequestExit = true;
-                break;
-            }
-
-            if (IsConfirmKey(key))
-            {
-                m_Mode = EGameMode::MainMenu;
-                m_MainMenuIndex = 0;
-            }
-
-            break;
-        }
-
         case EGameMode::MainMenu:
-        {
-            if (key == sf::Keyboard::Escape)
-            {
-                m_RequestExit = true;
-                break;
-            }
-
-            const bool up = IsUpKey(key);
-            const bool down = IsDownKey(key);
-
-            const int oldIndex = m_MainMenuIndex;
-            m_MainMenuIndex = MoveMenuIndex(m_MainMenuIndex, 2, up, down);
-
-            if (m_MainMenuIndex != oldIndex)
-                break;
-
-            if (IsConfirmKey(key))
-            {
-                if (m_MainMenuIndex == 0)
-                {
-                    m_Mode = EGameMode::ChooseMode;
-                    m_ChooseIndex = 5;
-                }
-                else
-                {
-                    m_RequestExit = true;
-                }
-            }
-
+            HandleMainMenuInput(key);
             break;
-        }
 
         case EGameMode::ChooseMode:
-        {
-            if (key == sf::Keyboard::Escape)
-            {
-                m_Mode = EGameMode::MainMenu;
-                m_MainMenuIndex = 0;
-                break;
-            }
-
-            const bool up = IsUpKey(key);
-            const bool down = IsDownKey(key);
-
-            const int oldIndex = m_ChooseIndex;
-            m_ChooseIndex = MoveMenuIndex(m_ChooseIndex, 6, up, down);
-
-            if (m_ChooseIndex != oldIndex)
-                break;
-
-            switch (key)
-            {
-            case sf::Keyboard::Num1: m_ChooseIndex = 0; ApplyChooseSelection(); break;
-            case sf::Keyboard::Num2: m_ChooseIndex = 1; ApplyChooseSelection(); break;
-            case sf::Keyboard::Num3: m_ChooseIndex = 2; ApplyChooseSelection(); break;
-            case sf::Keyboard::Num4: m_ChooseIndex = 3; ApplyChooseSelection(); break;
-            case sf::Keyboard::Num5: m_ChooseIndex = 4; ApplyChooseSelection(); break;
-            default:
-                if (IsConfirmKey(key))
-                {
-                    if (m_ChooseIndex == 5)
-                        StartFromChooseMode();
-                    else
-                        ApplyChooseSelection();
-                }
-                break;
-            }
-
+            HandleChooseModeInput(key);
             break;
-        }
 
         case EGameMode::GameOver:
-        {
-            if (key == sf::Keyboard::Escape)
-            {
-                m_Mode = EGameMode::MainMenu;
-                m_MainMenuIndex = 0;
-                break;
-            }
-
-            const bool up = IsUpKey(key);
-            const bool down = IsDownKey(key);
-
-            const int oldIndex = m_GameOverIndex;
-            m_GameOverIndex = MoveMenuIndex(m_GameOverIndex, 2, up, down);
-
-            if (m_GameOverIndex != oldIndex)
-                break;
-
-            if (IsConfirmKey(key))
-            {
-                if (m_GameOverIndex == 0)
-                {
-                    ResetGameplay();
-                    m_Mode = EGameMode::Playing;
-                }
-                else
-                {
-                    m_Mode = EGameMode::MainMenu;
-                    m_MainMenuIndex = 0;
-                }
-            }
-
+            HandleGameOverInput(key);
             break;
-        }
+
+        case EGameMode::Leaderboard:
+            HandleLeaderboardInput(key);
+            break;
 
         default:
             break;
         }
-    }
-
-    void Game::Update(float dtSeconds)
-    {
-        if (m_Mode == EGameMode::Splash)
-            m_SplashTimerSeconds += dtSeconds;
-
-        if (m_Mode == EGameMode::Playing)
-            UpdatePlaying(dtSeconds);
-
-        UIModel model{};
-        model.mode = m_Mode;
-        model.score = m_Score;
-        model.mainMenuIndex = m_MainMenuIndex;
-        model.chooseIndex = m_ChooseIndex;
-        model.gameOverIndex = m_GameOverIndex;
-        model.rules = m_Rules;
-
-        UpdateUI(m_Ui, model);
-    }
-
-    void Game::Draw(sf::RenderWindow& window)
-    {
-        if (m_Mode == EGameMode::Splash)
-        {
-            const float t01 =
-                Clamp01(m_SplashTimerSeconds / UIConfig::k_SplashFadeSeconds);
-
-            const std::uint8_t alpha =
-                static_cast<std::uint8_t>(t01 * 255.0F);
-
-            DrawSplash(m_Ui, window, m_SplashSprite, alpha, m_SplashTimerSeconds);
-            return;
-        }
-
-        if (m_Mode == EGameMode::MainMenu)
-        {
-            DrawMainMenu(m_Ui, window, m_MenuSprites.main);
-            return;
-        }
-
-        if (m_Mode == EGameMode::ChooseMode)
-        {
-            DrawChooseMode(m_Ui, window, m_MenuSprites.choose);
-            return;
-        }
-
-        window.draw(m_BackgroundSprite);
-
-        m_Player.Draw(window);
-
-        for (int i = 0; i < m_ApplesCount; ++i)
-            m_Apples[i].Draw(window);
-
-        DrawHud(m_Ui, window);
-
-        if (m_Mode == EGameMode::GameOver)
-            DrawGameOver(m_Ui, window);
     }
 }

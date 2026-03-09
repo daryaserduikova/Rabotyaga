@@ -18,8 +18,6 @@ namespace ApplesGame
         const sf::Texture& MenuBackgroundTexture() const { return m_MenuBackgroundTexture; }
         const sf::Texture& ChooseMenuBackgroundTexture() const { return m_ChooseMenuBackgroundTexture; }
 
-        const sf::Texture& SplashTexture() const { return m_SplashTexture; }
-
         const sf::Font& UiFont() const { return m_UiFont; }
         const sf::Font& TitleFont() const { return m_TitleFont; }
 
@@ -34,8 +32,6 @@ namespace ApplesGame
 
         sf::Texture m_MenuBackgroundTexture;
         sf::Texture m_ChooseMenuBackgroundTexture;
-
-        sf::Texture m_SplashTexture;
 
         sf::Font m_UiFont;
         sf::Font m_TitleFont;

@@ -2,276 +2,373 @@
 
 #include "UI.h"
 
+#include <initializer_list>
 #include <string>
-#include <cmath>
 
 #include "Constants.h"
-#include "GameRules.h"
 
 namespace ApplesGame
 {
-    void SetupCenteredText(sf::Text& text, float x, float y)
+    namespace
     {
-        const sf::FloatRect bounds = text.getLocalBounds();
-        text.setOrigin(bounds.left + bounds.width / 2.0F,
-            bounds.top + bounds.height / 2.0F);
-        text.setPosition(x, y);
-    }
+        constexpr const char* k_MainTitle = "RABOTYAGA";
+        constexpr const char* k_PlayText = "Play";
+        constexpr const char* k_ExitText = "Exit";
 
-    static sf::Text MakeCenteredText(
-        const char* str,
-        const sf::Font& font,
-        unsigned size,
-        const sf::Color& color,
-        float x,
-        float y)
-    {
-        sf::Text text(str, font, size);
-        text.setFillColor(color);
-        SetupCenteredText(text, x, y);
-        return text;
-    }
+        constexpr const char* k_ChooseTitle = "CHOOSE MODE";
+        constexpr const char* k_ChooseApplesHeader = "Apples:";
+        constexpr const char* k_ChooseSpeedHeader = "Speed:";
+        constexpr const char* k_ChooseFinite20Label = "1 - Finite (20)";
+        constexpr const char* k_ChooseFinite50Label = "2 - Finite (50)";
+        constexpr const char* k_ChooseInfiniteLabel = "3 - Infinite";
+        constexpr const char* k_ChooseSpeedUpLabel = "4 - Speed up on eat";
+        constexpr const char* k_ChooseNoSpeedUpLabel = "5 - No speed up";
+        constexpr const char* k_ChooseStartLabel = "START";
 
-    static const char* Arrow(bool active) { return active ? "> " : "  "; }
-    static const char* Check(bool active) { return active ? "[X] " : "[ ] "; }
+        constexpr const char* k_GameOverTitle = "GAME OVER";
+        constexpr const char* k_GameOverRestart = "Restart";
+        constexpr const char* k_GameOverLeaderboard = "Leaderboard";
 
-    static void SetTextAlpha(sf::Text& text, sf::Uint8 alpha)
-    {
-        sf::Color c = text.getFillColor();
-        c.a = alpha;
-        text.setFillColor(c);
-    }
+        constexpr const char* k_LeaderboardTitle = "LEADERBOARD";
+        constexpr const char* k_LeaderboardBack = "> Back";
 
-    // SUPER SIMPLE: no function objects, just data
-    struct ChooseLine
-    {
-        int index;
-        bool checked;
-        const char* text;
-    };
-
-    static std::string BuildChooseListText(const UIModel& model)
-    {
-        const bool finite20 = HasRule(model.rules, EGameRule::Finite20);
-        const bool finite50 = HasRule(model.rules, EGameRule::Finite50);
-        const bool infinite = HasRule(model.rules, EGameRule::InfiniteApples);
-
-        const bool speedUp = HasRule(model.rules, EGameRule::SpeedUpOnEat);
-        const bool noSpeed = HasRule(model.rules, EGameRule::NoSpeedUpOnEat);
-
-        const ChooseLine apples[] =
+        void CenterText(sf::Text& text, float x, float y)
         {
-            { 0, finite20,  "1 - Finite (20)" },
-            { 1, finite50,  "2 - Finite (50)" },
-            { 2, infinite,  "3 - Infinite"   },
-        };
-
-        const ChooseLine speed[] =
-        {
-            { 3, speedUp,   "4 - Speed up on eat" },
-            { 4, noSpeed,   "5 - No speed up"     },
-        };
-
-        std::string s;
-
-        s += "Apples:\n";
-        for (const auto& line : apples)
-        {
-            const bool active = (model.chooseIndex == line.index);
-            s += std::string(Arrow(active)) + Check(line.checked) + line.text + "\n";
+            const sf::FloatRect bounds = text.getLocalBounds();
+            text.setOrigin(
+                bounds.left + bounds.width * 0.5f,
+                bounds.top + bounds.height * 0.5f);
+            text.setPosition(x, y);
         }
 
-        s += "\nSpeed:\n";
-        for (const auto& line : speed)
+        void LeftAlignText(sf::Text& text, float x, float y)
         {
-            const bool active = (model.chooseIndex == line.index);
-            s += std::string(Arrow(active)) + Check(line.checked) + line.text + "\n";
+            const sf::FloatRect bounds = text.getLocalBounds();
+            text.setOrigin(bounds.left, bounds.top);
+            text.setPosition(x, y);
         }
 
-        return s;
-    }
+        void RightAlignText(sf::Text& text, float x, float y)
+        {
+            const sf::FloatRect bounds = text.getLocalBounds();
+            text.setOrigin(bounds.left + bounds.width, bounds.top);
+            text.setPosition(x, y);
+        }
 
-    static std::string BuildGameOverText(const UIModel& model)
-    {
-        std::string g;
-        g += std::string(Arrow(model.gameOverIndex == 0)) + "Restart\n";
-        g += std::string(Arrow(model.gameOverIndex == 1)) + "Exit\n";
-        return g;
+        const char* Check(bool value)
+        {
+            return value ? "[x] " : "[ ] ";
+        }
+
+        std::string MakeMenuLine(bool selected, const std::string& text)
+        {
+            return std::string(selected ? "> " : "  ") + text;
+        }
+
+        std::string MakeChooseLine(bool selected, bool checked, const std::string& label)
+        {
+            return std::string(selected ? "> " : "  ") + Check(checked) + label;
+        }
+
+        std::string MakeLeaderboardEntryLine(int place, const std::string& name)
+        {
+            std::string line = std::to_string(place) + ". " + name + " ";
+            while (line.size() < 50)
+            {
+                line += '.';
+            }
+            return line;
+        }
+
+        void SetupMenuText(sf::Text& text, const sf::Font& font, unsigned int size, const sf::Color& color)
+        {
+            text.setFont(font);
+            text.setCharacterSize(size);
+            text.setFillColor(color);
+            text.setOutlineThickness(0.0f);
+            text.setOutlineColor(UIConfig::k_TextOutlineColor);
+        }
+
+        void SetSelectedStyle(
+            sf::Text& text,
+            bool selected,
+            const sf::Color& baseColor,
+            const sf::Color& selectedColor)
+        {
+            text.setFillColor(selected ? selectedColor : baseColor);
+
+            if (selected)
+            {
+                text.setOutlineThickness(UIConfig::k_TextOutlineThickness);
+                text.setOutlineColor(UIConfig::k_TextOutlineColor);
+            }
+            else
+            {
+                text.setOutlineThickness(0.0f);
+            }
+        }
+
+        struct TextSelectionStyle
+        {
+            sf::Text* text = nullptr;
+            bool selected = false;
+            sf::Color baseColor = sf::Color::White;
+            sf::Color selectedColor = sf::Color::White;
+        };
+
+        void ApplySelectionStyles(const std::initializer_list<TextSelectionStyle>& styles)
+        {
+            for (const TextSelectionStyle& style : styles)
+            {
+                if (style.text != nullptr)
+                {
+                    SetSelectedStyle(
+                        *style.text,
+                        style.selected,
+                        style.baseColor,
+                        style.selectedColor);
+                }
+            }
+        }
+
+        void UpdateMainMenuUI(UIState& ui, const UIModel& model)
+        {
+            ui.mainTitleText.setString(k_MainTitle);
+            CenterText(ui.mainTitleText, Screen::k_WidthF * 0.5f, UIConfig::k_MainTitleY);
+
+            ui.playText.setString(MakeMenuLine(model.mainMenuIndex == 0, k_PlayText));
+            ui.exitText.setString(MakeMenuLine(model.mainMenuIndex == 1, k_ExitText));
+
+            ApplySelectionStyles({
+                { &ui.playText, model.mainMenuIndex == 0, UIConfig::k_ColorStart, UIConfig::k_ColorStartActive },
+                { &ui.exitText, model.mainMenuIndex == 1, UIConfig::k_ColorStart, UIConfig::k_ColorStartActive }
+                });
+
+            CenterText(ui.playText, Screen::k_WidthF * 0.5f, UIConfig::k_MainPlayY);
+            CenterText(ui.exitText, Screen::k_WidthF * 0.5f, UIConfig::k_MainExitY);
+        }
+
+        void UpdateChooseMenuUI(UIState& ui, const UIModel& model)
+        {
+            const bool finite20 = HasRule(model.rules, EGameRule::Finite20);
+            const bool finite50 = HasRule(model.rules, EGameRule::Finite50);
+            const bool infinite = HasRule(model.rules, EGameRule::InfiniteApples);
+            const bool speedUp = HasRule(model.rules, EGameRule::SpeedUpOnEat);
+            const bool noSpeedUp = HasRule(model.rules, EGameRule::NoSpeedUpOnEat);
+
+            ui.chooseTitleText.setString(k_ChooseTitle);
+            CenterText(ui.chooseTitleText, Screen::k_WidthF * 0.5f, UIConfig::k_ChooseTitleY);
+
+            ui.chooseApplesHeaderText.setString(k_ChooseApplesHeader);
+            ui.chooseFinite20Text.setString(MakeChooseLine(model.chooseIndex == 0, finite20, k_ChooseFinite20Label));
+            ui.chooseFinite50Text.setString(MakeChooseLine(model.chooseIndex == 1, finite50, k_ChooseFinite50Label));
+            ui.chooseInfiniteText.setString(MakeChooseLine(model.chooseIndex == 2, infinite, k_ChooseInfiniteLabel));
+
+            ui.chooseSpeedHeaderText.setString(k_ChooseSpeedHeader);
+            ui.chooseSpeedUpText.setString(MakeChooseLine(model.chooseIndex == 3, speedUp, k_ChooseSpeedUpLabel));
+            ui.chooseNoSpeedUpText.setString(MakeChooseLine(model.chooseIndex == 4, noSpeedUp, k_ChooseNoSpeedUpLabel));
+
+            ui.chooseStartText.setString(MakeMenuLine(model.chooseIndex == 5, k_ChooseStartLabel));
+
+            ApplySelectionStyles({
+                { &ui.chooseFinite20Text, model.chooseIndex == 0, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseFinite50Text, model.chooseIndex == 1, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseInfiniteText, model.chooseIndex == 2, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseSpeedUpText, model.chooseIndex == 3, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseNoSpeedUpText, model.chooseIndex == 4, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseStartText, model.chooseIndex == 5, UIConfig::k_ColorStart, UIConfig::k_ColorStartActive }
+                });
+
+            const float x = UIConfig::k_ChooseListLeftX;
+            const float y = UIConfig::k_ChooseListTopY;
+            const float line = UIConfig::k_ChooseLineStep;
+
+            LeftAlignText(ui.chooseApplesHeaderText, x, y);
+            LeftAlignText(ui.chooseFinite20Text, x, y + line * 1.0f);
+            LeftAlignText(ui.chooseFinite50Text, x, y + line * 2.0f);
+            LeftAlignText(ui.chooseInfiniteText, x, y + line * 3.0f);
+
+            LeftAlignText(ui.chooseSpeedHeaderText, x, y + line * UIConfig::k_ChooseSpeedHeaderLine);
+            LeftAlignText(ui.chooseSpeedUpText, x, y + line * UIConfig::k_ChooseSpeedUpLine);
+            LeftAlignText(ui.chooseNoSpeedUpText, x, y + line * UIConfig::k_ChooseNoSpeedUpLine);
+
+            LeftAlignText(ui.chooseStartText, x, y + line * UIConfig::k_ChooseStartLine);
+        }
+
+        void UpdateHudUI(UIState& ui, const UIModel& model)
+        {
+            ui.scoreText.setString("Score: " + std::to_string(model.score));
+            ui.scoreText.setPosition(UIConfig::k_HudScoreX, UIConfig::k_HudScoreY);
+        }
+
+        void UpdateGameOverUI(UIState& ui, const UIModel& model)
+        {
+            ui.gameOverTitleText.setString(k_GameOverTitle);
+            CenterText(ui.gameOverTitleText, Screen::k_WidthF * 0.5f, UIConfig::k_GameOverTitleY);
+
+            ui.gameOverMenuText.setString(
+                model.gameOverIndex == 0
+                ? MakeMenuLine(true, k_GameOverRestart) + "\n" + MakeMenuLine(false, k_GameOverLeaderboard) + "\n" + MakeMenuLine(false, k_ExitText)
+                : model.gameOverIndex == 1
+                ? MakeMenuLine(false, k_GameOverRestart) + "\n" + MakeMenuLine(true, k_GameOverLeaderboard) + "\n" + MakeMenuLine(false, k_ExitText)
+                : MakeMenuLine(false, k_GameOverRestart) + "\n" + MakeMenuLine(false, k_GameOverLeaderboard) + "\n" + MakeMenuLine(true, k_ExitText));
+
+            CenterText(ui.gameOverMenuText, Screen::k_WidthF * 0.5f, UIConfig::k_GameOverMenuY);
+        }
+
+        void UpdateLeaderboardUI(UIState& ui, const UIModel& model)
+        {
+            ui.leaderboardTitleText.setString(k_LeaderboardTitle);
+            CenterText(ui.leaderboardTitleText, Screen::k_WidthF * 0.5f, UIConfig::k_LeaderboardTitleY);
+
+            for (int i = 0; i < k_MaxLeaderboardEntries; ++i)
+            {
+                ui.leaderboardEntryTexts[i].setString("");
+                ui.leaderboardScoreTexts[i].setString("");
+            }
+
+            for (int i = 0; i < model.leaderboardCount; ++i)
+            {
+                ui.leaderboardEntryTexts[i].setString(
+                    MakeLeaderboardEntryLine(i + 1, model.leaderboardNames[i]));
+
+                ui.leaderboardScoreTexts[i].setString(
+                    std::to_string(model.leaderboardScores[i]));
+
+                const float y = UIConfig::k_LeaderboardFirstRowY + UIConfig::k_LeaderboardRowStep * static_cast<float>(i);
+
+                LeftAlignText(ui.leaderboardEntryTexts[i], UIConfig::k_LeaderboardLeftX, y);
+                RightAlignText(ui.leaderboardScoreTexts[i], UIConfig::k_LeaderboardRightX, y);
+            }
+
+            ui.leaderboardBackText.setString(k_LeaderboardBack);
+            CenterText(ui.leaderboardBackText, Screen::k_WidthF * 0.5f, UIConfig::k_LeaderboardBackY);
+        }
     }
 
     void InitUI(UIState& ui, const sf::Font& uiFont, const sf::Font& titleFont)
     {
-        const sf::Color white(255, 255, 255);
-        const sf::Color hud(255, 255, 255, 160);
+        // Main
+        ui.mainTitleText.setFont(titleFont);
+        ui.mainTitleText.setCharacterSize(UIConfig::k_TitleSize);
+        ui.mainTitleText.setFillColor(UIConfig::k_ColorWhite);
+        ui.mainTitleText.setOutlineThickness(UIConfig::k_TitleOutlineThickness);
+        ui.mainTitleText.setOutlineColor(UIConfig::k_TitleOutlineColor);
 
-        const sf::Color chooseBrown(125, 85, 45);
+        SetupMenuText(ui.playText, uiFont, UIConfig::k_StartSize, UIConfig::k_ColorStart);
+        SetupMenuText(ui.exitText, uiFont, UIConfig::k_StartSize, UIConfig::k_ColorStart);
 
+        // Choose
+        ui.chooseTitleText.setFont(titleFont);
+        ui.chooseTitleText.setCharacterSize(UIConfig::k_ChooseTitleSize);
+        ui.chooseTitleText.setFillColor(UIConfig::k_ColorWhite);
+        ui.chooseTitleText.setOutlineThickness(UIConfig::k_TitleOutlineThickness);
+        ui.chooseTitleText.setOutlineColor(UIConfig::k_TitleOutlineColor);
+
+        SetupMenuText(ui.chooseApplesHeaderText, uiFont, UIConfig::k_ChooseListSize, UIConfig::k_ColorChooseHeader);
+        SetupMenuText(ui.chooseFinite20Text, uiFont, UIConfig::k_ChooseListSize, UIConfig::k_ColorChooseList);
+        SetupMenuText(ui.chooseFinite50Text, uiFont, UIConfig::k_ChooseListSize, UIConfig::k_ColorChooseList);
+        SetupMenuText(ui.chooseInfiniteText, uiFont, UIConfig::k_ChooseListSize, UIConfig::k_ColorChooseList);
+        SetupMenuText(ui.chooseSpeedHeaderText, uiFont, UIConfig::k_ChooseListSize, UIConfig::k_ColorChooseHeader);
+        SetupMenuText(ui.chooseSpeedUpText, uiFont, UIConfig::k_ChooseListSize, UIConfig::k_ColorChooseList);
+        SetupMenuText(ui.chooseNoSpeedUpText, uiFont, UIConfig::k_ChooseListSize, UIConfig::k_ColorChooseList);
+        SetupMenuText(ui.chooseStartText, uiFont, UIConfig::k_StartSize, UIConfig::k_ColorStart);
+
+        // HUD
         ui.scoreText.setFont(uiFont);
-        ui.scoreText.setCharacterSize(24);
-        ui.scoreText.setFillColor(hud);
-        ui.scoreText.setPosition(24.0F, 18.0F);
+        ui.scoreText.setCharacterSize(UIConfig::k_HudSize);
+        ui.scoreText.setFillColor(UIConfig::k_ColorHud);
+        ui.scoreText.setOutlineThickness(1.0f);
+        ui.scoreText.setOutlineColor(UIConfig::k_TextOutlineColor);
 
-        ui.splashTitleText = MakeCenteredText(
-            "RABOTYAGA",
-            titleFont,
-            54,
-            white,
-            Screen::k_WidthF / 2.0F,
-            Screen::k_HeightF / 2.0F - 30.0F
-        );
+        // GameOver
+        ui.gameOverTitleText.setFont(titleFont);
+        ui.gameOverTitleText.setCharacterSize(UIConfig::k_GameOverSize);
+        ui.gameOverTitleText.setFillColor(UIConfig::k_ColorGameOver);
+        ui.gameOverTitleText.setOutlineThickness(UIConfig::k_GameOverOutlineThickness);
+        ui.gameOverTitleText.setOutlineColor(UIConfig::k_GameOverOutlineColor);
 
-        ui.splashHintText = MakeCenteredText(
-            "Press SPACE to Start",
-            uiFont,
-            22,
-            sf::Color(255, 255, 255, 220),
-            Screen::k_WidthF / 2.0F,
-            Screen::k_HeightF / 2.0F + 20.0F
-        );
+        ui.gameOverMenuText.setFont(uiFont);
+        ui.gameOverMenuText.setCharacterSize(UIConfig::k_StartSize);
+        ui.gameOverMenuText.setFillColor(UIConfig::k_ColorWhite);
+        ui.gameOverMenuText.setOutlineThickness(UIConfig::k_TextOutlineThickness);
+        ui.gameOverMenuText.setOutlineColor(UIConfig::k_TextOutlineColor);
 
-        ui.mainTitleText = MakeCenteredText(
-            "RABOTYAGA",
-            titleFont,
-            48,
-            white,
-            Screen::k_WidthF / 2.0F,
-            Screen::k_HeightF / 2.0F - 90.0F
-        );
+        // Leaderboard
+        ui.leaderboardTitleText.setFont(titleFont);
+        ui.leaderboardTitleText.setCharacterSize(UIConfig::k_GameOverSize);
+        ui.leaderboardTitleText.setFillColor(UIConfig::k_ColorWhite);
+        ui.leaderboardTitleText.setOutlineThickness(UIConfig::k_TitleOutlineThickness);
+        ui.leaderboardTitleText.setOutlineColor(UIConfig::k_TitleOutlineColor);
 
-        ui.playText.setFont(uiFont);
-        ui.playText.setCharacterSize(28);
-        ui.playText.setFillColor(sf::Color(255, 255, 255, 230));
-        ui.exitText = ui.playText;
+        for (int i = 0; i < k_MaxLeaderboardEntries; ++i)
+        {
+            ui.leaderboardEntryTexts[i].setFont(uiFont);
+            ui.leaderboardEntryTexts[i].setCharacterSize(UIConfig::k_LeaderboardSize);
+            ui.leaderboardEntryTexts[i].setFillColor(UIConfig::k_ColorWhite);
+            ui.leaderboardEntryTexts[i].setOutlineThickness(1.0f);
+            ui.leaderboardEntryTexts[i].setOutlineColor(UIConfig::k_TextOutlineColor);
 
-        ui.chooseTitleText = MakeCenteredText(
-            "CHOOSE MODE",
-            titleFont,
-            36,
-            white,
-            Screen::k_WidthF / 2.0F,
-            120.0F
-        );
+            ui.leaderboardScoreTexts[i].setFont(uiFont);
+            ui.leaderboardScoreTexts[i].setCharacterSize(UIConfig::k_LeaderboardSize);
+            ui.leaderboardScoreTexts[i].setFillColor(UIConfig::k_ColorWhite);
+            ui.leaderboardScoreTexts[i].setOutlineThickness(1.0f);
+            ui.leaderboardScoreTexts[i].setOutlineColor(UIConfig::k_TextOutlineColor);
+        }
 
-        ui.chooseListText.setFont(uiFont);
-        ui.chooseListText.setCharacterSize(20);
-        ui.chooseListText.setFillColor(chooseBrown);
-
-        ui.chooseStartText.setFont(uiFont);
-        ui.chooseStartText.setString("START");
-        ui.chooseStartText.setCharacterSize(34);
-        ui.chooseStartText.setStyle(sf::Text::Regular);
-        ui.chooseStartText.setOutlineThickness(0.0F);
-        ui.chooseStartText.setOutlineColor(sf::Color::Transparent);
-
-        ui.gameOverTitleText = MakeCenteredText(
-            "GAME OVER",
-            titleFont,
-            36,
-            sf::Color(255, 0, 0),
-            Screen::k_WidthF / 2.0F,
-            Screen::k_HeightF / 2.0F - 90.0F
-        );
-
-        ui.gameOverListText.setFont(uiFont);
-        ui.gameOverListText.setCharacterSize(22);
-        ui.gameOverListText.setFillColor(sf::Color(255, 255, 255, 230));
+        ui.leaderboardBackText.setFont(uiFont);
+        ui.leaderboardBackText.setCharacterSize(UIConfig::k_StartSize);
+        ui.leaderboardBackText.setFillColor(UIConfig::k_ColorStartActive);
+        ui.leaderboardBackText.setOutlineThickness(UIConfig::k_TextOutlineThickness);
+        ui.leaderboardBackText.setOutlineColor(UIConfig::k_TextOutlineColor);
     }
 
     void UpdateUI(UIState& ui, const UIModel& model)
     {
-        ui.scoreText.setString("Score: " + std::to_string(model.score));
-
-        ui.playText.setString(model.mainMenuIndex == 0 ? "> Play" : "  Play");
-        ui.exitText.setString(model.mainMenuIndex == 1 ? "> Exit" : "  Exit");
-        ui.playText.setPosition(Screen::k_WidthF / 2.0F - 60.0F, 260.0F);
-        ui.exitText.setPosition(Screen::k_WidthF / 2.0F - 60.0F, 305.0F);
-
-        ui.chooseListText.setString(BuildChooseListText(model));
-        SetupCenteredText(
-            ui.chooseListText,
-            UIConfig::k_ChooseListCenterX,
-            UIConfig::k_ChooseListCenterY + UIConfig::k_ChooseListOffsetY
-        );
-
-        // START button styling
-        const bool startSelected = (model.chooseIndex == 5);
-
-        const sf::Color activeColor(90, 55, 25);
-        const sf::Color idleColor(140, 105, 70);
-        const sf::Color glowColor(205, 160, 95, 120);
-
-        ui.chooseStartText.setString(startSelected ? "> START <" : "START");
-        ui.chooseStartText.setCharacterSize(startSelected ? 38 : 34);
-        ui.chooseStartText.setStyle(startSelected ? sf::Text::Bold : sf::Text::Regular);
-        ui.chooseStartText.setFillColor(startSelected ? activeColor : idleColor);
-
-        if (startSelected)
+        switch (model.mode)
         {
-            ui.chooseStartText.setOutlineThickness(2.0F);
-            ui.chooseStartText.setOutlineColor(glowColor);
-        }
-        else
-        {
-            ui.chooseStartText.setOutlineThickness(0.0F);
-            ui.chooseStartText.setOutlineColor(sf::Color::Transparent);
-        }
+        case EGameMode::MainMenu:
+            UpdateMainMenuUI(ui, model);
+            break;
 
-        SetupCenteredText(
-            ui.chooseStartText,
-            UIConfig::k_ChooseListCenterX - 55.0F,
-            UIConfig::k_ChooseListCenterY + UIConfig::k_ChooseStartOffsetY - 28.0F
-        );
+        case EGameMode::ChooseMode:
+            UpdateChooseMenuUI(ui, model);
+            break;
 
-        ui.gameOverListText.setString(BuildGameOverText(model));
-        SetupCenteredText(ui.gameOverListText, Screen::k_WidthF / 2.0F, Screen::k_HeightF / 2.0F);
+        case EGameMode::Playing:
+            UpdateHudUI(ui, model);
+            break;
+
+        case EGameMode::GameOver:
+            UpdateHudUI(ui, model);
+            UpdateGameOverUI(ui, model);
+            break;
+
+        case EGameMode::Leaderboard:
+            UpdateLeaderboardUI(ui, model);
+            break;
+        }
     }
 
-    void DrawSplash(
-        UIState& ui,
-        sf::RenderWindow& window,
-        const sf::Sprite& splashSprite,
-        std::uint8_t alpha,
-        float timeSeconds)
+    void DrawMainMenu(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background)
     {
-        sf::Sprite sprite = splashSprite;
-        sprite.setColor(sf::Color(255, 255, 255, alpha));
-        window.draw(sprite);
-
-        const sf::Color oldTitle = ui.splashTitleText.getFillColor();
-        const sf::Color oldHint = ui.splashHintText.getFillColor();
-
-        SetTextAlpha(ui.splashTitleText, alpha);
-
-        const float wave = std::sin(timeSeconds * UIConfig::k_TwoPi * UIConfig::k_SplashBlinkHz);
-        const float blink01 = (wave + 1.0F) * 0.5F;
-
-        const float fade01 = static_cast<float>(alpha) / 255.0F;
-        constexpr float k_MinA = 80.0F;
-        constexpr float k_MaxA = 255.0F;
-        const float a = (k_MinA + blink01 * (k_MaxA - k_MinA)) * fade01;
-
-        SetTextAlpha(ui.splashHintText, static_cast<sf::Uint8>(a));
-
-        window.draw(ui.splashTitleText);
-        window.draw(ui.splashHintText);
-
-        ui.splashTitleText.setFillColor(oldTitle);
-        ui.splashHintText.setFillColor(oldHint);
-    }
-
-    void DrawMainMenu(UIState& ui, sf::RenderWindow& window, const sf::Sprite& menuBackground)
-    {
-        window.draw(menuBackground);
+        window.draw(background);
         window.draw(ui.mainTitleText);
         window.draw(ui.playText);
         window.draw(ui.exitText);
     }
 
-    void DrawChooseMode(UIState& ui, sf::RenderWindow& window, const sf::Sprite& menuBackground)
+    void DrawChooseMode(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background)
     {
-        window.draw(menuBackground);
+        window.draw(background);
         window.draw(ui.chooseTitleText);
-        window.draw(ui.chooseListText);
+        window.draw(ui.chooseApplesHeaderText);
+        window.draw(ui.chooseFinite20Text);
+        window.draw(ui.chooseFinite50Text);
+        window.draw(ui.chooseInfiniteText);
+        window.draw(ui.chooseSpeedHeaderText);
+        window.draw(ui.chooseSpeedUpText);
+        window.draw(ui.chooseNoSpeedUpText);
         window.draw(ui.chooseStartText);
     }
 
@@ -283,6 +380,20 @@ namespace ApplesGame
     void DrawGameOver(UIState& ui, sf::RenderWindow& window)
     {
         window.draw(ui.gameOverTitleText);
-        window.draw(ui.gameOverListText);
+        window.draw(ui.gameOverMenuText);
+    }
+
+    void DrawLeaderboard(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background)
+    {
+        window.draw(background);
+        window.draw(ui.leaderboardTitleText);
+
+        for (int i = 0; i < k_MaxLeaderboardEntries; ++i)
+        {
+            window.draw(ui.leaderboardEntryTexts[i]);
+            window.draw(ui.leaderboardScoreTexts[i]);
+        }
+
+        window.draw(ui.leaderboardBackText);
     }
 }
