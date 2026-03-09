@@ -1,8 +1,11 @@
 // @file Game.h
 
 #pragma once
+
 #include <SFML/Graphics.hpp>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "AudioManager.h"
 #include "Apple.h"
@@ -20,11 +23,10 @@ namespace ApplesGame
         sf::Sprite choose;
     };
 
-    struct LeaderboardEntry
+    struct Record
     {
         std::string name;
         int score = 0;
-        bool isPlayer = false;
     };
 
     class Game
@@ -62,7 +64,9 @@ namespace ApplesGame
         // Leaderboard
         void GenerateLeaderboard();
         void UpdatePlayerLeaderboard();
-        void SortLeaderboardDescending();
+
+        std::vector<Record> BuildSortedLeaderboardRecords() const;
+        static void SortRecordsDescending(std::vector<Record>& records);
 
         // Input
         void HandleMainMenuInput(sf::Keyboard::Key key);
@@ -75,7 +79,7 @@ namespace ApplesGame
         static const int k_ChooseMenuCount = 6;
         static const int k_GameOverCount = 3;
         static const int k_ChooseStartIndex = 5;
-        static const int k_LeaderboardCount = 7;
+        static const int k_DefaultLeaderboardCount = 7;
 
     private:
         EGameMode m_Mode = EGameMode::MainMenu;
@@ -93,7 +97,7 @@ namespace ApplesGame
         Apple* m_Apples = nullptr;
         int m_ApplesCount = 0;
 
-        LeaderboardEntry m_Leaderboard[k_LeaderboardCount];
+        std::unordered_map<std::string, int> m_Leaderboard;
 
         Resources m_Resources;
         AudioManager m_Audio;

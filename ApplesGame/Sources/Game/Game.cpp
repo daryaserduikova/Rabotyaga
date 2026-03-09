@@ -14,15 +14,16 @@ namespace ApplesGame
     {
         constexpr const char* k_PlayerName = "Player";
 
-        constexpr const char* k_LeaderboardNames[] =
+        constexpr int k_FakePlayersCount = 6;
+
+        constexpr const char* k_FakePlayerNames[k_FakePlayersCount] =
         {
             "Rodion",
             "Tikhon",
             "Missha",
-            "Eva",
+            "Dassha",
             "Sergey",
-            "Alla",
-            k_PlayerName
+            "Alla"
         };
 
         bool IsUpKey(sf::Keyboard::Key key)
@@ -65,11 +66,9 @@ namespace ApplesGame
             return index;
         }
 
-        bool ShouldSwapLeaderboardEntries(
-            const LeaderboardEntry& left,
-            const LeaderboardEntry& right)
+        int MakeRandomLeaderboardScore()
         {
-            return left.score < right.score;
+            return 30 + (std::rand() % 121);
         }
     }
 
@@ -129,6 +128,8 @@ namespace ApplesGame
             UpdatePlaying(dtSeconds);
         }
 
+        const std::vector<Record> sorted = BuildSortedLeaderboardRecords();
+
         UIModel model{};
         model.mode = m_Mode;
         model.score = m_Score;
@@ -136,12 +137,18 @@ namespace ApplesGame
         model.chooseIndex = m_ChooseIndex;
         model.gameOverIndex = m_GameOverIndex;
         model.rules = m_Rules;
-        model.leaderboardCount = k_LeaderboardCount;
 
-        for (int i = 0; i < k_LeaderboardCount; ++i)
+        const int count = static_cast<int>(sorted.size());
+
+        model.leaderboardCount =
+            count < k_MaxLeaderboardEntries
+            ? count
+            : k_MaxLeaderboardEntries;
+
+        for (int i = 0; i < model.leaderboardCount; ++i)
         {
-            model.leaderboardNames[i] = m_Leaderboard[i].name;
-            model.leaderboardScores[i] = m_Leaderboard[i].score;
+            model.leaderboardNames[i] = sorted[i].name;
+            model.leaderboardScores[i] = sorted[i].score;
         }
 
         UpdateUI(m_Ui, model);
@@ -213,6 +220,7 @@ namespace ApplesGame
     void Game::OnAppleEaten(int index)
     {
         ++m_Score;
+
         m_Audio.PlayEatApple();
 
         if (HasRule(m_Rules, EGameRule::SpeedUpOnEat) &&
@@ -242,21 +250,15 @@ namespace ApplesGame
 
     void Game::EnsureDefaultRules()
     {
-        const bool hasAppleMode =
-            HasRule(m_Rules, EGameRule::Finite20) ||
-            HasRule(m_Rules, EGameRule::Finite50) ||
-            HasRule(m_Rules, EGameRule::InfiniteApples);
-
-        if (!hasAppleMode)
+        if (!HasRule(m_Rules, EGameRule::Finite20) &&
+            !HasRule(m_Rules, EGameRule::Finite50) &&
+            !HasRule(m_Rules, EGameRule::InfiniteApples))
         {
             m_Rules |= EGameRule::InfiniteApples;
         }
 
-        const bool hasSpeedMode =
-            HasRule(m_Rules, EGameRule::SpeedUpOnEat) ||
-            HasRule(m_Rules, EGameRule::NoSpeedUpOnEat);
-
-        if (!hasSpeedMode)
+        if (!HasRule(m_Rules, EGameRule::SpeedUpOnEat) &&
+            !HasRule(m_Rules, EGameRule::NoSpeedUpOnEat))
         {
             m_Rules |= EGameRule::SpeedUpOnEat;
         }
@@ -313,47 +315,53 @@ namespace ApplesGame
 
     void Game::GenerateLeaderboard()
     {
-        for (int i = 0; i < k_LeaderboardCount; ++i)
+        m_Leaderboard.clear();
+
+        for (int i = 0; i < k_FakePlayersCount; ++i)
         {
-            LeaderboardEntry& entry = m_Leaderboard[i];
-            entry.name = k_LeaderboardNames[i];
-            entry.isPlayer = (entry.name == k_PlayerName);
-            entry.score = entry.isPlayer ? 0 : 30 + (std::rand() % 121);
+            m_Leaderboard[k_FakePlayerNames[i]] = MakeRandomLeaderboardScore();
         }
 
-        SortLeaderboardDescending();
+        m_Leaderboard[k_PlayerName] = 0;
     }
 
     void Game::UpdatePlayerLeaderboard()
     {
-        for (int i = 0; i < k_LeaderboardCount; ++i)
-        {
-            if (!m_Leaderboard[i].isPlayer)
-            {
-                continue;
-            }
-
-            m_Leaderboard[i].score = m_Score;
-            break;
-        }
-
-        SortLeaderboardDescending();
+        m_Leaderboard[k_PlayerName] = m_Score;
     }
 
-    void Game::SortLeaderboardDescending()
+    std::vector<Record> Game::BuildSortedLeaderboardRecords() const
     {
-        for (int i = 0; i < k_LeaderboardCount - 1; ++i)
-        {
-            for (int j = 0; j < k_LeaderboardCount - 1 - i; ++j)
-            {
-                if (!ShouldSwapLeaderboardEntries(m_Leaderboard[j], m_Leaderboard[j + 1]))
-                {
-                    continue;
-                }
+        std::vector<Record> records;
+        records.reserve(m_Leaderboard.size());
 
-                const LeaderboardEntry temp = m_Leaderboard[j];
-                m_Leaderboard[j] = m_Leaderboard[j + 1];
-                m_Leaderboard[j + 1] = temp;
+        for (auto it = m_Leaderboard.begin(); it != m_Leaderboard.end(); ++it)
+        {
+            Record r;
+            r.name = it->first;
+            r.score = it->second;
+            records.push_back(r);
+        }
+
+        SortRecordsDescending(records);
+
+        return records;
+    }
+
+    void Game::SortRecordsDescending(std::vector<Record>& records)
+    {
+        const int count = static_cast<int>(records.size());
+
+        for (int i = 0; i < count - 1; ++i)
+        {
+            for (int j = 0; j < count - 1 - i; ++j)
+            {
+                if (records[j].score < records[j + 1].score)
+                {
+                    Record temp = records[j];
+                    records[j] = records[j + 1];
+                    records[j + 1] = temp;
+                }
             }
         }
     }
@@ -371,18 +379,16 @@ namespace ApplesGame
 
         for (int i = 0; i < m_ApplesCount; ++i)
         {
-            if (!IsCirclesCollide(
+            if (IsCirclesCollide(
                 m_Player.Position(), m_Player.Radius(),
                 m_Apples[i].Position(), m_Apples[i].Radius()))
             {
-                continue;
-            }
+                OnAppleEaten(i);
 
-            OnAppleEaten(i);
-
-            if (!IsInfiniteMode())
-            {
-                --i;
+                if (!IsInfiniteMode())
+                {
+                    --i;
+                }
             }
         }
     }
@@ -390,6 +396,7 @@ namespace ApplesGame
     void Game::EnterGameOver()
     {
         UpdatePlayerLeaderboard();
+
         m_GameOverIndex = 0;
         m_Mode = EGameMode::GameOver;
     }
@@ -411,10 +418,11 @@ namespace ApplesGame
         {
             m_Mode = EGameMode::ChooseMode;
             m_ChooseIndex = k_ChooseStartIndex;
-            return;
         }
-
-        m_RequestExit = true;
+        else
+        {
+            m_RequestExit = true;
+        }
     }
 
     void Game::HandleChooseModeInput(sf::Keyboard::Key key)
@@ -434,10 +442,11 @@ namespace ApplesGame
         {
             ResetGameplay();
             m_Mode = EGameMode::Playing;
-            return;
         }
-
-        ApplyChooseSelection();
+        else
+        {
+            ApplyChooseSelection();
+        }
     }
 
     void Game::HandleGameOverInput(sf::Keyboard::Key key)
@@ -453,20 +462,18 @@ namespace ApplesGame
             return;
         }
 
-        switch (m_GameOverIndex)
+        if (m_GameOverIndex == 0)
         {
-        case 0:
             ResetGameplay();
             m_Mode = EGameMode::Playing;
-            break;
-
-        case 1:
+        }
+        else if (m_GameOverIndex == 1)
+        {
             m_Mode = EGameMode::Leaderboard;
-            break;
-
-        default:
+        }
+        else
+        {
             m_Mode = EGameMode::MainMenu;
-            break;
         }
     }
 
