@@ -1,5 +1,3 @@
-// @file Game.h
-
 #pragma once
 
 #include <SFML/Graphics.hpp>
@@ -39,21 +37,13 @@ namespace ApplesGame
         void Update(float dtSeconds);
         void Draw(sf::RenderWindow& window);
 
-        bool ShouldExit() const
-        {
-            return m_RequestExit;
-        }
+        bool ShouldExit() const { return m_RequestExit; }
 
     private:
         // Core
         void ResetGameplay();
         void UpdatePlaying(float dtSeconds);
         void EnterGameOver();
-
-        // Apples
-        void AllocateApples(int count);
-        void FreeApples();
-        void OnAppleEaten(int index);
 
         // Rules
         void EnsureDefaultRules();
@@ -74,12 +64,16 @@ namespace ApplesGame
         void HandleGameOverInput(sf::Keyboard::Key key);
         void HandleLeaderboardInput(sf::Keyboard::Key key);
 
+        void HandlePlayerInput();
+
     private:
         static const int k_MainMenuCount = 2;
         static const int k_ChooseMenuCount = 6;
         static const int k_GameOverCount = 3;
         static const int k_ChooseStartIndex = 5;
-        static const int k_DefaultLeaderboardCount = 7;
+
+        static const int k_MinFakeScore = 30;
+        static const int k_MaxFakeScore = 150;
 
     private:
         EGameMode m_Mode = EGameMode::MainMenu;
@@ -93,9 +87,7 @@ namespace ApplesGame
         int m_Score = 0;
 
         Player m_Player;
-
-        Apple* m_Apples = nullptr;
-        int m_ApplesCount = 0;
+        std::vector<Apple> m_Apples;
 
         std::unordered_map<std::string, int> m_Leaderboard;
 
@@ -105,5 +97,6 @@ namespace ApplesGame
 
         sf::Sprite m_Background;
         MenuSprites m_MenuSprites;
+        sf::Sprite m_GameOverBackground;
     };
 }

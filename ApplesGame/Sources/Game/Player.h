@@ -1,5 +1,3 @@
-// @file Player.h
-
 #pragma once
 #include <SFML/Graphics.hpp>
 
@@ -21,9 +19,10 @@ namespace ApplesGame
     public:
         void Reset(const sf::Texture& texture);
 
-        void HandleInput();
         void Update(float dtSeconds);
         void Draw(sf::RenderWindow& window);
+
+        void SetDirection(EPlayerDirection dir); // ? новое
 
         bool HasCollisionWithScreenBorder() const;
 

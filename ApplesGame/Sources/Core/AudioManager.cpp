@@ -1,8 +1,6 @@
-// @file AudioManager.cpp
-
 #include "AudioManager.h"
-
 #include "MathUtils.h"
+#include <iostream>
 
 namespace ApplesGame
 {
@@ -13,11 +11,21 @@ namespace ApplesGame
 
     bool AudioManager::Init(const std::string& resourcesPath)
     {
-        const bool isMusicLoaded =
-            m_BackgroundMusic.openFromFile(resourcesPath + "Audio/backgroundMusic.wav");
+        const std::string musicPath = resourcesPath + "Audio/backgroundMusic.wav";
+        const std::string sfxPath = resourcesPath + "Audio/EatApple.wav";
 
-        const bool isEatAppleLoaded =
-            m_EatAppleBuffer.loadFromFile(resourcesPath + "Audio/EatApple.wav");
+        const bool isMusicLoaded = m_BackgroundMusic.openFromFile(musicPath);
+        const bool isEatAppleLoaded = m_EatAppleBuffer.loadFromFile(sfxPath);
+
+        if (!isMusicLoaded)
+        {
+            std::cout << "Music NOT loaded: " << musicPath << "\n";
+        }
+
+        if (!isEatAppleLoaded)
+        {
+            std::cout << "SFX NOT loaded: " << sfxPath << "\n";
+        }
 
         if (!isMusicLoaded || !isEatAppleLoaded)
         {

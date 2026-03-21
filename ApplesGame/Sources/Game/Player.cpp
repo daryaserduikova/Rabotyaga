@@ -1,5 +1,3 @@
-// @file Player.cpp
-
 #include "Player.h"
 
 namespace ApplesGame
@@ -16,40 +14,9 @@ namespace ApplesGame
         m_Sprite.setRotation(0.0F);
     }
 
-    void Player::HandleInput()
+    void Player::SetDirection(EPlayerDirection dir)
     {
-        const bool right =
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::D);
-
-        const bool up =
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-
-        const bool left =
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::A);
-
-        const bool down =
-            sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
-            sf::Keyboard::isKeyPressed(sf::Keyboard::S);
-
-        if (right)
-        {
-            m_Direction = EPlayerDirection::Right;
-        }
-        else if (up)
-        {
-            m_Direction = EPlayerDirection::Up;
-        }
-        else if (left)
-        {
-            m_Direction = EPlayerDirection::Left;
-        }
-        else if (down)
-        {
-            m_Direction = EPlayerDirection::Down;
-        }
+        m_Direction = dir;
     }
 
     void Player::Update(float dtSeconds)
@@ -57,58 +24,49 @@ namespace ApplesGame
         switch (m_Direction)
         {
         case EPlayerDirection::Up:
-        {
             m_Position.y -= m_Speed * dtSeconds;
             break;
-        }
+
         case EPlayerDirection::Right:
-        {
             m_Position.x += m_Speed * dtSeconds;
             break;
-        }
+
         case EPlayerDirection::Down:
-        {
             m_Position.y += m_Speed * dtSeconds;
             break;
-        }
+
         case EPlayerDirection::Left:
-        {
             m_Position.x -= m_Speed * dtSeconds;
             break;
-        }
         }
     }
 
     void Player::ApplySpriteTransform()
     {
-        const sf::Vector2f scale = GetSpriteScale(m_Sprite, { PlayerConfig::k_Size, PlayerConfig::k_Size });
+        const sf::Vector2f scale =
+            GetSpriteScale(m_Sprite, { PlayerConfig::k_Size, PlayerConfig::k_Size });
 
         switch (m_Direction)
         {
         case EPlayerDirection::Up:
-        {
             m_Sprite.setScale(scale.x, scale.y);
             m_Sprite.setRotation(-90.0F);
             break;
-        }
+
         case EPlayerDirection::Right:
-        {
             m_Sprite.setScale(scale.x, scale.y);
             m_Sprite.setRotation(0.0F);
             break;
-        }
+
         case EPlayerDirection::Down:
-        {
             m_Sprite.setScale(scale.x, scale.y);
             m_Sprite.setRotation(90.0F);
             break;
-        }
+
         case EPlayerDirection::Left:
-        {
             m_Sprite.setScale(-scale.x, scale.y);
             m_Sprite.setRotation(0.0F);
             break;
-        }
         }
     }
 
@@ -121,25 +79,10 @@ namespace ApplesGame
 
     bool Player::HasCollisionWithScreenBorder() const
     {
-        if (m_Position.x - PlayerConfig::k_Radius < 0.0F)
-        {
-            return true;
-        }
-
-        if (m_Position.x + PlayerConfig::k_Radius > Screen::k_WidthF)
-        {
-            return true;
-        }
-
-        if (m_Position.y - PlayerConfig::k_Radius < 0.0F)
-        {
-            return true;
-        }
-
-        if (m_Position.y + PlayerConfig::k_Radius > Screen::k_HeightF)
-        {
-            return true;
-        }
+        if (m_Position.x - PlayerConfig::k_Radius < 0.0F) return true;
+        if (m_Position.x + PlayerConfig::k_Radius > Screen::k_WidthF) return true;
+        if (m_Position.y - PlayerConfig::k_Radius < 0.0F) return true;
+        if (m_Position.y + PlayerConfig::k_Radius > Screen::k_HeightF) return true;
 
         return false;
     }

@@ -1,7 +1,4 @@
-// @file Resources.cpp
-
 #include "Resources.h"
-
 #include "Constants.h"
 #include "Loggers.h"
 
@@ -14,7 +11,6 @@ namespace ApplesGame
             LogError("Failed to load texture: " + path);
             return false;
         }
-
         return true;
     }
 
@@ -25,7 +21,6 @@ namespace ApplesGame
             LogError("Failed to load font: " + path);
             return false;
         }
-
         return true;
     }
 
@@ -40,6 +35,8 @@ namespace ApplesGame
 
         ok = LoadTexture(m_MenuBackgroundTexture, basePath + "MenuBackground.png") && ok;
         ok = LoadTexture(m_ChooseMenuBackgroundTexture, basePath + "MenuChooseMode.png") && ok;
+
+        ok = LoadTexture(m_GameOverTexture, basePath + "GameOver.png") && ok;
 
         ok = LoadFont(m_UiFont, basePath + Paths::k_UiFont) && ok;
         ok = LoadFont(m_TitleFont, basePath + Paths::k_TitleFont) && ok;

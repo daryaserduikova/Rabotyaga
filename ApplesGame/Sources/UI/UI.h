@@ -1,5 +1,3 @@
-// @file UI.h
-
 #pragma once
 
 #include <SFML/Graphics.hpp>
@@ -13,6 +11,7 @@ namespace ApplesGame
 {
     constexpr int k_MaxLeaderboardEntries = 7;
 
+    // UI MODEL
     struct UIModel
     {
         EGameMode mode = EGameMode::MainMenu;
@@ -31,12 +30,12 @@ namespace ApplesGame
 
     struct UIState
     {
-        // Main
+        // MAIN
         sf::Text mainTitleText;
         sf::Text playText;
         sf::Text exitText;
 
-        // Choose
+        // CHOOSE
         sf::Text chooseTitleText;
         sf::Text chooseApplesHeaderText;
         sf::Text chooseFinite20Text;
@@ -50,11 +49,11 @@ namespace ApplesGame
         // HUD
         sf::Text scoreText;
 
-        // GameOver
+        // GAME OVER
         sf::Text gameOverTitleText;
         sf::Text gameOverMenuText;
 
-        // Leaderboard
+        // LEADERBOARD
         sf::Text leaderboardTitleText;
         sf::Text leaderboardEntryTexts[k_MaxLeaderboardEntries];
         sf::Text leaderboardScoreTexts[k_MaxLeaderboardEntries];
@@ -67,6 +66,6 @@ namespace ApplesGame
     void DrawMainMenu(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background);
     void DrawChooseMode(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background);
     void DrawHud(UIState& ui, sf::RenderWindow& window);
-    void DrawGameOver(UIState& ui, sf::RenderWindow& window);
+    void DrawGameOver(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background);
     void DrawLeaderboard(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background);
 }

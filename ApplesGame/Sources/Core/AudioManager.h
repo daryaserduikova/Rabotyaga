@@ -1,6 +1,4 @@
-﻿// @file AudioManager.h
-
-#pragma once
+﻿#pragma once
 #include <SFML/Audio.hpp>
 #include <string>
 
@@ -34,7 +32,7 @@ namespace ApplesGame
         sf::SoundBuffer m_EatAppleBuffer;
         sf::Sound m_EatAppleSound;
 
-        float m_MusicVolume01 = 0.30F;
-        float m_SfxVolume01 = 0.60F;
+        float m_MusicVolume01 = 1.0F;
+        float m_SfxVolume01 = 1.0F;
     };
 }

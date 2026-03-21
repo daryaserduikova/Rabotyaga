@@ -25,10 +25,12 @@
     <ClCompile Include="Sources\Game\Apple.cpp" />
     <ClCompile Include="Sources\Game\Game.cpp" />
     <ClCompile Include="Sources\Game\Player.cpp" />
-    <ClCompile Include="Sources\UI\UI.cpp" />
     <ClCompile Include="Sources\Utils\Loggers.cpp" />
     <ClCompile Include="Sources\Utils\MathUtils.cpp" />
     <ClCompile Include="Sources\Utils\RenderHelpers.cpp" />
+    <ClCompile Include="UI_Draw.cpp" />
+    <ClCompile Include="UI_Init.cpp" />
+    <ClCompile Include="UI_Update.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\Core\AudioManager.h" />
@@ -40,11 +42,11 @@
     <ClInclude Include="Sources\Game\GameRules.h" />
     <ClInclude Include="Sources\Game\Player.h" />
     <ClInclude Include="Sources\UI\UI.h" />
-    <ClInclude Include="Sources\UI\UIModel.h" />
     <ClInclude Include="Sources\Utils\Loggers.h" />
     <ClInclude Include="Sources\Utils\MathUtils.h" />
     <ClInclude Include="Sources\Utils\RenderHelpers.h" />
     <ClInclude Include="Sources\Utils\Utils.h" />
+    <ClInclude Include="UI_Common.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
