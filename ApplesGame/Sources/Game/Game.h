@@ -3,6 +3,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <memory>
 #include <vector>
 
 #include "AudioManager.h"
@@ -38,6 +39,7 @@ namespace ApplesGame
         void ResetGameplay();
         void UpdatePlaying(float dtSeconds);
         void EnterGameOver();
+        void EnterVictory();
 
     private:
         static const int k_MainMenuCount = 3;
@@ -60,11 +62,11 @@ namespace ApplesGame
         Player m_Player;
         std::vector<Apple> m_Apples;
 
-        Leaderboard m_Leaderboard;
+        std::unique_ptr<Leaderboard> m_Leaderboard;
+        std::unique_ptr<Resources> m_Resources;
+        std::unique_ptr<AudioManager> m_Audio;
+        std::unique_ptr<UIState> m_Ui;
 
-        Resources m_Resources;
-        AudioManager m_Audio;
-        UIState m_Ui;
         UIModel m_UiModel;
 
         sf::Sprite m_Background;

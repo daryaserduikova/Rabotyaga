@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <cstdlib>
 #include <ctime>
+#include <memory>
 
 #include "Constants.h"
 #include "Game.h"
@@ -17,8 +18,9 @@ int main()
     );
     window.setFramerateLimit(60);
 
-    ApplesGame::Game game;
-    if (!game.Init())
+    auto game = std::make_unique<ApplesGame::Game>();
+
+    if (!game->Init())
     {
         return 1;
     }
@@ -42,25 +44,25 @@ int main()
         {
             if (event.type == sf::Event::Closed)
             {
-                game.Shutdown();
+                game->Shutdown();
                 window.close();
                 break;
             }
 
-            game.HandleEvent(event);
+            game->HandleEvent(event);
         }
 
-        if (game.ShouldExit())
+        if (game->ShouldExit())
         {
-            game.Shutdown();
+            game->Shutdown();
             window.close();
             break;
         }
 
-        game.Update(dtSeconds);
+        game->Update(dtSeconds);
 
         window.clear();
-        game.Draw(window);
+        game->Draw(window);
         window.display();
     }
 

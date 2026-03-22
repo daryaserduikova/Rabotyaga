@@ -63,9 +63,6 @@
     <ClInclude Include="Sources\Game\GameRules.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Game\Player.h">
-      <Filter>Game</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\UI\UI.h">
       <Filter>UI</Filter>
     </ClInclude>
@@ -86,6 +83,9 @@
     </ClInclude>
     <ClInclude Include="Sources\UI\UI_Common.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Game\Player.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -11,6 +11,7 @@ namespace ApplesGame
         Playing,
         GameOver,
         Leaderboard,
-        Pause
+        Pause,
+        Victory
     };
 }

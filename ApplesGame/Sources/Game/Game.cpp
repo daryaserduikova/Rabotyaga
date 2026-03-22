@@ -79,32 +79,37 @@ namespace ApplesGame
 
     bool Game::Init()
     {
-        if (!m_Resources.Load(Paths::k_Resources))
+        m_Resources = std::make_unique<Resources>();
+        m_Audio = std::make_unique<AudioManager>();
+        m_Ui = std::make_unique<UIState>();
+        m_Leaderboard = std::make_unique<Leaderboard>();
+
+        if (!m_Resources->Load(Paths::k_Resources))
         {
             return false;
         }
 
-        if (!m_Audio.Init(Paths::k_Resources))
+        if (!m_Audio->Init(Paths::k_Resources))
         {
             return false;
         }
 
-        m_Audio.PlayMusic();
+        m_Audio->PlayMusic();
 
-        m_Background.setTexture(m_Resources.BackgroundTexture());
+        m_Background.setTexture(m_Resources->BackgroundTexture());
         FitSpriteToScreen(m_Background);
 
-        m_MenuSprites.main.setTexture(m_Resources.MenuBackgroundTexture());
+        m_MenuSprites.main.setTexture(m_Resources->MenuBackgroundTexture());
         FitSpriteToScreen(m_MenuSprites.main);
 
-        m_MenuSprites.choose.setTexture(m_Resources.ChooseMenuBackgroundTexture());
+        m_MenuSprites.choose.setTexture(m_Resources->ChooseMenuBackgroundTexture());
         FitSpriteToScreen(m_MenuSprites.choose);
 
-        InitUI(m_Ui, m_Resources.UiFont(), m_Resources.TitleFont());
+        InitUI(*m_Ui, m_Resources->UiFont(), m_Resources->TitleFont());
 
         m_Rules = EGameRule::InfiniteApples | EGameRule::SpeedUpOnEat;
 
-        m_Leaderboard.Load();
+        m_Leaderboard->Load();
 
         m_Mode = EGameMode::MainMenu;
         m_RequestExit = false;
@@ -121,12 +126,15 @@ namespace ApplesGame
 
     void Game::Shutdown()
     {
-        m_Audio.Shutdown();
+        if (m_Audio)
+        {
+            m_Audio->Shutdown();
+        }
     }
 
     void Game::ResetGameplay()
     {
-        m_Player.Reset(m_Resources.PlayerTexture());
+        m_Player.Reset(m_Resources->PlayerTexture());
         m_Score = 0;
         m_PauseIndex = 0;
 
@@ -146,7 +154,7 @@ namespace ApplesGame
 
         for (auto& apple : m_Apples)
         {
-            apple.Respawn(m_Resources.AppleTexture());
+            apple.Respawn(m_Resources->AppleTexture());
         }
     }
 
@@ -177,14 +185,16 @@ namespace ApplesGame
             return;
         }
 
-        for (auto& apple : m_Apples)
+        for (size_t i = 0; i < m_Apples.size();)
         {
+            Apple& apple = m_Apples[i];
+
             if (IsCirclesCollide(
                 m_Player.Position(), m_Player.Radius(),
                 apple.Position(), apple.Radius()))
             {
                 ++m_Score;
-                m_Audio.PlayEatApple();
+                m_Audio->PlayEatApple();
 
                 if (HasRule(m_Rules, EGameRule::SpeedUpOnEat) &&
                     !HasRule(m_Rules, EGameRule::NoSpeedUpOnEat))
@@ -192,7 +202,25 @@ namespace ApplesGame
                     m_Player.AddSpeed(k_SpeedUpAmount);
                 }
 
-                apple.Respawn(m_Resources.AppleTexture());
+                if (HasRule(m_Rules, EGameRule::InfiniteApples))
+                {
+                    apple.Respawn(m_Resources->AppleTexture());
+                    ++i;
+                }
+                else
+                {
+                    m_Apples.erase(m_Apples.begin() + static_cast<std::ptrdiff_t>(i));
+
+                    if (m_Apples.empty())
+                    {
+                        EnterVictory();
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                ++i;
             }
         }
     }
@@ -210,11 +238,12 @@ namespace ApplesGame
         case EGameMode::GameOver:
         case EGameMode::Leaderboard:
         case EGameMode::Pause:
+        case EGameMode::Victory:
         default:
             break;
         }
 
-        const auto& sorted = m_Leaderboard.GetSorted();
+        const auto& sorted = m_Leaderboard->GetSorted();
 
         m_UiModel.mode = m_Mode;
         m_UiModel.score = m_Score;
@@ -240,26 +269,26 @@ namespace ApplesGame
             m_UiModel.leaderboardScores[i] = sorted[i].score;
         }
 
-        UpdateUI(m_Ui, m_UiModel);
+        UpdateUI(*m_Ui, m_UiModel);
     }
 
     void Game::Draw(sf::RenderWindow& window)
     {
         if (m_Mode == EGameMode::MainMenu)
         {
-            DrawMainMenu(m_Ui, window, m_MenuSprites.main);
+            DrawMainMenu(*m_Ui, window, m_MenuSprites.main);
             return;
         }
 
         if (m_Mode == EGameMode::ChooseMode)
         {
-            DrawChooseMode(m_Ui, window, m_MenuSprites.choose);
+            DrawChooseMode(*m_Ui, window, m_MenuSprites.choose);
             return;
         }
 
         if (m_Mode == EGameMode::Leaderboard)
         {
-            DrawLeaderboard(m_Ui, window, m_Background);
+            DrawLeaderboard(*m_Ui, window, m_Background);
             return;
         }
 
@@ -272,25 +301,38 @@ namespace ApplesGame
             apple.Draw(window);
         }
 
-        DrawHud(m_Ui, window);
+        DrawHud(*m_Ui, window);
 
         if (m_Mode == EGameMode::GameOver)
         {
-            DrawGameOver(m_Ui, window, m_Background);
+            DrawGameOver(*m_Ui, window, m_Background);
         }
         else if (m_Mode == EGameMode::Pause)
         {
-            DrawPause(m_Ui, window, m_Background);
+            DrawPause(*m_Ui, window, m_Background);
+        }
+        else if (m_Mode == EGameMode::Victory)
+        {
+            DrawGameOver(*m_Ui, window, m_Background);
         }
     }
 
     void Game::EnterGameOver()
     {
-        m_Leaderboard.UpdatePlayer("Player", m_Score);
-        m_Leaderboard.Save();
+        m_Leaderboard->UpdatePlayer("Player", m_Score);
+        m_Leaderboard->Save();
 
         m_GameOverIndex = 0;
         m_Mode = EGameMode::GameOver;
+    }
+
+    void Game::EnterVictory()
+    {
+        m_Leaderboard->UpdatePlayer("Player", m_Score);
+        m_Leaderboard->Save();
+
+        m_GameOverIndex = 0;
+        m_Mode = EGameMode::Victory;
     }
 
     void Game::HandleEvent(const sf::Event& event)
@@ -408,6 +450,7 @@ namespace ApplesGame
         }
 
         case EGameMode::GameOver:
+        case EGameMode::Victory:
         {
             HandleMenuNavigation(m_GameOverIndex, k_GameOverCount, key);
 

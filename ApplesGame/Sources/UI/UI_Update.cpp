@@ -87,11 +87,24 @@ namespace ApplesGame
         }
 
         case EGameMode::GameOver:
+        case EGameMode::Victory:
         {
             ui.scoreText.setString("Score: " + std::to_string(model.score));
             ui.scoreText.setPosition(UIConfig::k_HudScoreX, UIConfig::k_HudScoreY);
 
-            ui.gameOverTitleText.setString("GAME OVER");
+            const bool isVictory = (model.mode == EGameMode::Victory);
+
+            ui.gameOverTitleText.setString(isVictory ? "VICTORY" : "GAME OVER");
+
+            if (isVictory)
+            {
+                ui.gameOverTitleText.setFillColor(sf::Color(0, 255, 0)); // зелёный
+            }
+            else
+            {
+                ui.gameOverTitleText.setFillColor(UIConfig::k_ColorGameOver);
+            }
+
             CenterText(ui.gameOverTitleText, Screen::k_WidthF * 0.5f, UIConfig::k_GameOverTitleY);
 
             std::string menu;
