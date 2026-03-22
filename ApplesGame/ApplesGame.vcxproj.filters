@@ -28,13 +28,16 @@
     <ClCompile Include="Sources\Utils\RenderHelpers.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="UI_Init.cpp">
+    <ClCompile Include="Sources\Game\Leaderboard.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\UI\UI_Draw.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="UI_Update.cpp">
+    <ClCompile Include="Sources\UI\UI_Init.cpp">
       <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="UI_Draw.cpp">
+    <ClCompile Include="Sources\UI\UI_Update.cpp">
       <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
@@ -78,7 +81,10 @@
     <ClInclude Include="Sources\Utils\Utils.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="UI_Common.h">
+    <ClInclude Include="Sources\Game\Leaderboard.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\UI\UI_Common.h">
       <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,6 +10,7 @@ namespace ApplesGame
         ChooseMode,
         Playing,
         GameOver,
-        Leaderboard
+        Leaderboard,
+        Pause
     };
 }

@@ -1,3 +1,5 @@
+//@file UI.h
+
 #pragma once
 
 #include <SFML/Graphics.hpp>
@@ -11,7 +13,6 @@ namespace ApplesGame
 {
     constexpr int k_MaxLeaderboardEntries = 7;
 
-    // UI MODEL
     struct UIModel
     {
         EGameMode mode = EGameMode::MainMenu;
@@ -20,6 +21,7 @@ namespace ApplesGame
         int mainMenuIndex = 0;
         int chooseIndex = 0;
         int gameOverIndex = 0;
+        int pauseIndex = 0;
 
         EGameRule rules = EGameRule::None;
 
@@ -30,12 +32,13 @@ namespace ApplesGame
 
     struct UIState
     {
-        // MAIN
+        // Main menu
         sf::Text mainTitleText;
         sf::Text playText;
+        sf::Text leaderboardText;
         sf::Text exitText;
 
-        // CHOOSE
+        // Choose mode
         sf::Text chooseTitleText;
         sf::Text chooseApplesHeaderText;
         sf::Text chooseFinite20Text;
@@ -49,15 +52,20 @@ namespace ApplesGame
         // HUD
         sf::Text scoreText;
 
-        // GAME OVER
+        // Game over
         sf::Text gameOverTitleText;
         sf::Text gameOverMenuText;
 
-        // LEADERBOARD
+        // Leaderboard
         sf::Text leaderboardTitleText;
         sf::Text leaderboardEntryTexts[k_MaxLeaderboardEntries];
         sf::Text leaderboardScoreTexts[k_MaxLeaderboardEntries];
         sf::Text leaderboardBackText;
+
+        // Pause
+        sf::Text pauseTitleText;
+        sf::Text pauseContinueText;
+        sf::Text pauseExitText;
     };
 
     void InitUI(UIState& ui, const sf::Font& uiFont, const sf::Font& titleFont);
@@ -68,4 +76,5 @@ namespace ApplesGame
     void DrawHud(UIState& ui, sf::RenderWindow& window);
     void DrawGameOver(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background);
     void DrawLeaderboard(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background);
+    void DrawPause(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background);
 }

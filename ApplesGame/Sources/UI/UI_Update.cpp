@@ -1,3 +1,5 @@
+//@file UI_Update.cpp
+
 #include "UI.h"
 #include "UI_Common.h"
 #include "Constants.h"
@@ -14,10 +16,18 @@ namespace ApplesGame
             CenterText(ui.mainTitleText, Screen::k_WidthF * 0.5f, UIConfig::k_MainTitleY);
 
             ui.playText.setString(MakeMenuLine(model.mainMenuIndex == 0, "Play"));
-            ui.exitText.setString(MakeMenuLine(model.mainMenuIndex == 1, "Exit"));
+            ui.leaderboardText.setString(MakeMenuLine(model.mainMenuIndex == 1, "Leaderboard"));
+            ui.exitText.setString(MakeMenuLine(model.mainMenuIndex == 2, "Exit"));
+
+            ApplySelectionStyles({
+                { &ui.playText, model.mainMenuIndex == 0, UIConfig::k_ColorStart, UIConfig::k_ColorStartActive },
+                { &ui.leaderboardText, model.mainMenuIndex == 1, UIConfig::k_ColorStart, UIConfig::k_ColorStartActive },
+                { &ui.exitText, model.mainMenuIndex == 2, UIConfig::k_ColorStart, UIConfig::k_ColorStartActive }
+                });
 
             CenterText(ui.playText, Screen::k_WidthF * 0.5f, UIConfig::k_MainPlayY);
-            CenterText(ui.exitText, Screen::k_WidthF * 0.5f, UIConfig::k_MainExitY);
+            CenterText(ui.leaderboardText, Screen::k_WidthF * 0.5f, UIConfig::k_MainPlayY + 40.0f);
+            CenterText(ui.exitText, Screen::k_WidthF * 0.5f, UIConfig::k_MainPlayY + 80.0f);
             break;
         }
 
@@ -42,6 +52,15 @@ namespace ApplesGame
             ui.chooseNoSpeedUpText.setString(MakeChooseLine(model.chooseIndex == 4, noSpeedUp, "5 - No speed up"));
 
             ui.chooseStartText.setString(MakeMenuLine(model.chooseIndex == 5, "START"));
+
+            ApplySelectionStyles({
+                { &ui.chooseFinite20Text, model.chooseIndex == 0, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseFinite50Text, model.chooseIndex == 1, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseInfiniteText, model.chooseIndex == 2, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseSpeedUpText, model.chooseIndex == 3, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseNoSpeedUpText, model.chooseIndex == 4, UIConfig::k_ColorChooseList, UIConfig::k_ColorChooseListActive },
+                { &ui.chooseStartText, model.chooseIndex == 5, UIConfig::k_ColorStart, UIConfig::k_ColorStartActive }
+                });
 
             const float x = UIConfig::k_ChooseListLeftX;
             const float y = UIConfig::k_ChooseListTopY;
@@ -78,9 +97,7 @@ namespace ApplesGame
             std::string menu;
             menu += MakeMenuLine(model.gameOverIndex == 0, "Restart");
             menu += "\n";
-            menu += MakeMenuLine(model.gameOverIndex == 1, "Leaderboard");
-            menu += "\n";
-            menu += MakeMenuLine(model.gameOverIndex == 2, "Exit");
+            menu += MakeMenuLine(model.gameOverIndex == 1, "Exit");
 
             ui.gameOverMenuText.setString(menu);
             CenterText(ui.gameOverMenuText, Screen::k_WidthF * 0.5f, UIConfig::k_GameOverMenuY);
@@ -114,8 +131,26 @@ namespace ApplesGame
                 RightAlignText(ui.leaderboardScoreTexts[i], UIConfig::k_LeaderboardRightX, y);
             }
 
-            ui.leaderboardBackText.setString("> Back");
+            ui.leaderboardBackText.setString("Press BACKSPACE to return");
             CenterText(ui.leaderboardBackText, Screen::k_WidthF * 0.5f, UIConfig::k_LeaderboardBackY);
+            break;
+        }
+
+        case EGameMode::Pause:
+        {
+            ui.pauseTitleText.setString("PAUSE");
+            CenterText(ui.pauseTitleText, Screen::k_WidthF * 0.5f, 180.0f);
+
+            ui.pauseContinueText.setString(MakeMenuLine(model.pauseIndex == 0, "Continue"));
+            ui.pauseExitText.setString(MakeMenuLine(model.pauseIndex == 1, "Exit to menu"));
+
+            ApplySelectionStyles({
+                { &ui.pauseContinueText, model.pauseIndex == 0, UIConfig::k_ColorStart, UIConfig::k_ColorStartActive },
+                { &ui.pauseExitText, model.pauseIndex == 1, UIConfig::k_ColorStart, UIConfig::k_ColorStartActive }
+                });
+
+            CenterText(ui.pauseContinueText, Screen::k_WidthF * 0.5f, 280.0f);
+            CenterText(ui.pauseExitText, Screen::k_WidthF * 0.5f, 330.0f);
             break;
         }
         }

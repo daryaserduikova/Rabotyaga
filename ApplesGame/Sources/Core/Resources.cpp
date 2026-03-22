@@ -36,8 +36,6 @@ namespace ApplesGame
         ok = LoadTexture(m_MenuBackgroundTexture, basePath + "MenuBackground.png") && ok;
         ok = LoadTexture(m_ChooseMenuBackgroundTexture, basePath + "MenuChooseMode.png") && ok;
 
-        ok = LoadTexture(m_GameOverTexture, basePath + "GameOver.png") && ok;
-
         ok = LoadFont(m_UiFont, basePath + Paths::k_UiFont) && ok;
         ok = LoadFont(m_TitleFont, basePath + Paths::k_TitleFont) && ok;
 

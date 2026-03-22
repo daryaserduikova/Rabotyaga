@@ -1,3 +1,5 @@
+//@file UI_Init.cpp
+
 #include "UI.h"
 #include "UI_Common.h"
 #include "Constants.h"
@@ -14,6 +16,7 @@ namespace ApplesGame
         ui.mainTitleText.setOutlineColor(UIConfig::k_TitleOutlineColor);
 
         SetupMenuText(ui.playText, uiFont, UIConfig::k_StartSize, UIConfig::k_ColorStart);
+        SetupMenuText(ui.leaderboardText, uiFont, UIConfig::k_StartSize, UIConfig::k_ColorStart);
         SetupMenuText(ui.exitText, uiFont, UIConfig::k_StartSize, UIConfig::k_ColorStart);
 
         // CHOOSE
@@ -79,5 +82,15 @@ namespace ApplesGame
         ui.leaderboardBackText.setFillColor(UIConfig::k_ColorStartActive);
         ui.leaderboardBackText.setOutlineThickness(UIConfig::k_TextOutlineThickness);
         ui.leaderboardBackText.setOutlineColor(UIConfig::k_TextOutlineColor);
+
+        // PAUSE
+        ui.pauseTitleText.setFont(titleFont);
+        ui.pauseTitleText.setCharacterSize(UIConfig::k_GameOverSize);
+        ui.pauseTitleText.setFillColor(UIConfig::k_ColorWhite);
+        ui.pauseTitleText.setOutlineThickness(UIConfig::k_TitleOutlineThickness);
+        ui.pauseTitleText.setOutlineColor(UIConfig::k_TitleOutlineColor);
+
+        SetupMenuText(ui.pauseContinueText, uiFont, UIConfig::k_StartSize, UIConfig::k_ColorStart);
+        SetupMenuText(ui.pauseExitText, uiFont, UIConfig::k_StartSize, UIConfig::k_ColorStart);
     }
 }

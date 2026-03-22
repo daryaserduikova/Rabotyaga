@@ -22,7 +22,7 @@ namespace ApplesGame
         void Update(float dtSeconds);
         void Draw(sf::RenderWindow& window);
 
-        void SetDirection(EPlayerDirection dir); // ? новое
+        void SetDirection(EPlayerDirection dir);
 
         bool HasCollisionWithScreenBorder() const;
 

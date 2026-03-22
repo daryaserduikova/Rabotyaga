@@ -1,8 +1,8 @@
+//@file Game.h
+
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "AudioManager.h"
@@ -12,6 +12,7 @@
 #include "Player.h"
 #include "Resources.h"
 #include "UI.h"
+#include "Leaderboard.h"
 
 namespace ApplesGame
 {
@@ -19,12 +20,6 @@ namespace ApplesGame
     {
         sf::Sprite main;
         sf::Sprite choose;
-    };
-
-    struct Record
-    {
-        std::string name;
-        int score = 0;
     };
 
     class Game
@@ -40,48 +35,24 @@ namespace ApplesGame
         bool ShouldExit() const { return m_RequestExit; }
 
     private:
-        // Core
         void ResetGameplay();
         void UpdatePlaying(float dtSeconds);
         void EnterGameOver();
 
-        // Rules
-        void EnsureDefaultRules();
-        int GetInitialAppleCountFromRules() const;
-        bool IsInfiniteMode() const;
-        void ApplyChooseSelection();
-
-        // Leaderboard
-        void GenerateLeaderboard();
-        void UpdatePlayerLeaderboard();
-
-        std::vector<Record> BuildSortedLeaderboardRecords() const;
-        static void SortRecordsDescending(std::vector<Record>& records);
-
-        // Input
-        void HandleMainMenuInput(sf::Keyboard::Key key);
-        void HandleChooseModeInput(sf::Keyboard::Key key);
-        void HandleGameOverInput(sf::Keyboard::Key key);
-        void HandleLeaderboardInput(sf::Keyboard::Key key);
-
-        void HandlePlayerInput();
-
     private:
-        static const int k_MainMenuCount = 2;
+        static const int k_MainMenuCount = 3;
         static const int k_ChooseMenuCount = 6;
-        static const int k_GameOverCount = 3;
-        static const int k_ChooseStartIndex = 5;
-
-        static const int k_MinFakeScore = 30;
-        static const int k_MaxFakeScore = 150;
+        static const int k_GameOverCount = 2;
+        static const int k_PauseMenuCount = 2;
 
     private:
         EGameMode m_Mode = EGameMode::MainMenu;
         bool m_RequestExit = false;
 
         int m_MainMenuIndex = 0;
-        int m_ChooseIndex = k_ChooseStartIndex;
+        int m_ChooseIndex = 5;
         int m_GameOverIndex = 0;
+        int m_PauseIndex = 0;
 
         EGameRule m_Rules = EGameRule::None;
         int m_Score = 0;
@@ -89,14 +60,14 @@ namespace ApplesGame
         Player m_Player;
         std::vector<Apple> m_Apples;
 
-        std::unordered_map<std::string, int> m_Leaderboard;
+        Leaderboard m_Leaderboard;
 
         Resources m_Resources;
         AudioManager m_Audio;
         UIState m_Ui;
+        UIModel m_UiModel;
 
         sf::Sprite m_Background;
         MenuSprites m_MenuSprites;
-        sf::Sprite m_GameOverBackground;
     };
 }

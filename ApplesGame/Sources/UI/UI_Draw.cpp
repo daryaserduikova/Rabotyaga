@@ -1,3 +1,5 @@
+//@file UI_Draw.cpp
+
 #include "UI.h"
 
 namespace ApplesGame
@@ -7,20 +9,25 @@ namespace ApplesGame
         window.draw(background);
         window.draw(ui.mainTitleText);
         window.draw(ui.playText);
+        window.draw(ui.leaderboardText);
         window.draw(ui.exitText);
     }
 
     void DrawChooseMode(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background)
     {
         window.draw(background);
+
         window.draw(ui.chooseTitleText);
+
         window.draw(ui.chooseApplesHeaderText);
         window.draw(ui.chooseFinite20Text);
         window.draw(ui.chooseFinite50Text);
         window.draw(ui.chooseInfiniteText);
+
         window.draw(ui.chooseSpeedHeaderText);
         window.draw(ui.chooseSpeedUpText);
         window.draw(ui.chooseNoSpeedUpText);
+
         window.draw(ui.chooseStartText);
     }
 
@@ -32,6 +39,7 @@ namespace ApplesGame
     void DrawGameOver(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background)
     {
         window.draw(background);
+
         window.draw(ui.gameOverTitleText);
         window.draw(ui.gameOverMenuText);
     }
@@ -39,6 +47,7 @@ namespace ApplesGame
     void DrawLeaderboard(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background)
     {
         window.draw(background);
+
         window.draw(ui.leaderboardTitleText);
 
         for (int i = 0; i < k_MaxLeaderboardEntries; ++i)
@@ -48,5 +57,14 @@ namespace ApplesGame
         }
 
         window.draw(ui.leaderboardBackText);
+    }
+
+    void DrawPause(UIState& ui, sf::RenderWindow& window, const sf::Sprite& background)
+    {
+        window.draw(background);
+
+        window.draw(ui.pauseTitleText);
+        window.draw(ui.pauseContinueText);
+        window.draw(ui.pauseExitText);
     }
 }
